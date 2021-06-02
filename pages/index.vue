@@ -43,7 +43,7 @@ export default {
   data() {
     return {
       form: {
-        email: 'wawansumardi@outlook.com',
+        email: 'farrell.reid@example.org',
         password: 'password',
       },
     }

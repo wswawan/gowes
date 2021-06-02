@@ -3,7 +3,7 @@
     <v-container>
       <v-data-table
         :headers="usersHeaders"
-        :items="items"
+        :items="users"
         :search="search"
         item-key="email"
         fixed-header
@@ -63,6 +63,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   middleware: 'auth',
   data() {
@@ -74,7 +75,7 @@ export default {
         {
           text: 'Full Name',
           align: 'start',
-          value: 'fullname',
+          value: 'name',
         },
         {
           text: 'Email',
@@ -82,7 +83,7 @@ export default {
         },
         {
           text: 'Phone Number',
-          value: 'phoneNumber',
+          value: 'phone_number',
         },
         {
           text: 'Role',
@@ -95,28 +96,11 @@ export default {
           value: 'actions',
         },
       ],
-      items: [
-        {
-          fullname: 'John Doe',
-          email: 'johndoe@email.com',
-          role: 'participants',
-          phoneNumber: '03282421492',
-        },
-        {
-          fullname: 'Jane Doe',
-          email: 'janedoe@email.com',
-          phoneNumber: '9824329489',
-          role: 'committee',
-        },
-        {
-          fullname: 'Good People',
-          email: 'good@people.human',
-          phoneNumber: '29384209484',
-          role: 'participants',
-        },
-      ],
     }
   },
+  computed: mapGetters({
+    users: 'users/users',
+  }),
 }
 </script>
 

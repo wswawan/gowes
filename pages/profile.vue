@@ -23,7 +23,7 @@
         </v-card-subtitle>
         <v-card-text class="text-center">
           <div>{{ $auth.user.email }}</div>
-          <div>08123456789</div>
+          <div>{{ $auth.user.phone_number }}</div>
         </v-card-text>
       </v-card>
     </v-col>

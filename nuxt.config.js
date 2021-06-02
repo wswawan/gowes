@@ -48,7 +48,17 @@ export default {
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  axios: {
+    baseURL: 'http://biker.test',
+    credentials: true,
+    // headers: {
+    //   common: {
+    //     Accept: 'application/json, text/plain, */*',
+    //   },
+    //   'X-Requested-With': 'XMLHttpRequest',
+    //   'Content-Type': 'application/json',
+    // },
+  },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {

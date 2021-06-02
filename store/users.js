@@ -1,9 +1,10 @@
 /* eslint-disable no-console */
 export const state = () => ({
   form: {
-    email: 'wawansumardi@outlook.com',
+    email: 'farrell.reid@example.org',
     password: 'password',
   },
+  users: [],
 })
 
 export const mutations = {
@@ -19,5 +20,22 @@ export const mutations = {
     } catch (error) {
       console.log(error)
     }
+  },
+
+  SET_USERS(state, users) {
+    state.users = users
+  },
+}
+
+export const actions = {
+  async fetchUsers({ commit }) {
+    const users = await this.$axios.$get('/api/users')
+    commit('SET_USERS', users)
+  },
+}
+
+export const getters = {
+  users(state) {
+    return state.users
   },
 }
