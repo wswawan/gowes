@@ -5,19 +5,103 @@
         <v-toolbar dense color="grey darken-2">
           <v-toolbar-title>Register</v-toolbar-title>
         </v-toolbar>
+        <!-- <v-card-text v-if="alert"> </v-card-text> -->
         <v-card-text>
-          <v-form>
-            <v-text-field label="Email"></v-text-field>
-            <v-text-field label="Password"></v-text-field>
+          <v-alert :value="alert" :color="color" dense border="top">
+            <div v-for="(items, index) in error" :key="index">
+              <v-list-item-subtitle v-for="(item, id) in items" :key="id">{{
+                item
+              }}</v-list-item-subtitle>
+            </div>
+            {{ success }}
+          </v-alert>
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-text-field
+              :value="name"
+              :rules="rules.name"
+              label="Name"
+              required
+              @input="SET_NAME"
+            ></v-text-field>
+            <v-text-field
+              :value="email"
+              label="Email"
+              :rules="rules.email"
+              required
+              @input="SET_EMAIL"
+            ></v-text-field>
+            <v-text-field
+              type="number"
+              :value="phone_number"
+              label="Phone Number"
+              :rules="rules.phoneNumber"
+              required
+              @input="SET_PHONE_NUMBER"
+            ></v-text-field>
+            <!-- <v-text-field
+              :value="password"
+              label="Password"
+              type="password"
+            ></v-text-field>
+            <v-text-field
+              :value="confirm"
+              label="Confirm Password"
+              type="password"
+            ></v-text-field> -->
+            <v-text-field
+              :value="nik"
+              :rules="rules.nik"
+              label="NIK"
+              required
+              @input="SET_NIK"
+            ></v-text-field>
+            <v-menu
+              ref="menu"
+              v-model="menu"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              offset-y
+              min-width="auto"
+            >
+              <template #activator="{ on, attrs }">
+                <v-text-field
+                  :value="date_of_birth"
+                  :rules="rules.birthday"
+                  readonly
+                  label="Birthday date"
+                  prepend-inner-icon="mdi-calendar"
+                  required
+                  v-bind="attrs"
+                  v-on="on"
+                  @input="SET_BIRTHDAY"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                :value="date_of_birth"
+                :active-picker.sync="activePicker"
+                max="2014-12-31"
+                required
+                @input="SET_BIRTHDAY"
+                @change="save"
+              ></v-date-picker>
+            </v-menu>
+            <!-- <v-file-input
+              :value="imageId"
+              label="Input your id card here"
+              name="imageId"
+              @change="SET_IMAGE_ID"
+            ></v-file-input> -->
             <v-card-actions>
               <span class="caption align-center">
                 Have an Account ?
-                <v-btn text to="login" class="text-capitalize" small
-                  >Login</v-btn
-                >
+                <v-btn text to="/" class="text-capitalize" small>Login</v-btn>
               </span>
               <v-spacer></v-spacer>
-              <v-btn color="teal darken-3" class="mx-center" @click="login()"
+              <v-btn
+                :disabled="!valid"
+                color="teal darken-3"
+                class="mx-center"
+                @click.prevent="submitUser"
                 >Submit</v-btn
               >
             </v-card-actions>
@@ -29,22 +113,79 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+/* eslint-disable no-console */
+
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 export default {
   middleware: ['guest'],
-  data() {
-    return {
-      form: {
-        email: 'wawansumardi@outlook.com',
-        password: 'password',
-      },
-    }
+  data: () => ({
+    valid: true,
+    menu: false,
+    activePicker: null,
+    rules: {
+      name: [
+        (v) => !!v || 'Name is required',
+        (v) => (v && v.length >= 3) || 'Name must be 3 characters or more',
+      ],
+      email: [
+        (v) => !!v || 'Email is required',
+        (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+      ],
+      phoneNumber: [
+        (v) => !!v || 'Phone number is required',
+        (v) =>
+          Number.isInteger(Number(v)) || 'The value must be an integer number',
+      ],
+      nik: [
+        (v) => !!v || 'NIK is required',
+        (v) =>
+          Number.isInteger(Number(v)) || 'The value must be an integer number',
+      ],
+      birthday: [(v) => !!v || 'Birthday date is required'],
+    },
+  }),
+  computed: {
+    ...mapState('users', [
+      'name',
+      'email',
+      'nik',
+      'phone_number',
+      'date_of_birth',
+      'imageId',
+      'alert',
+      'color',
+      'error',
+      'success',
+    ]),
+  },
+  watch: {
+    menu(val) {
+      val && setTimeout(() => (this.activePicker = 'YEAR'))
+    },
   },
   methods: {
-    ...mapMutations({
-      login: 'users/login',
+    async submitUser() {
+      if (this.$refs.form.validate()) {
+        await this.register()
+        await this.$refs.form.resetValidation()
+      }
+    },
+    ...mapActions({
+      register: 'users/register',
     }),
+    ...mapMutations('users', [
+      'SET_NAME',
+      'SET_EMAIL',
+      'SET_PHONE_NUMBER',
+      'SET_NIK',
+      'SET_BIRTHDAY',
+      'SET_IMAGE_ID',
+      'SET_ALERT',
+    ]),
+    save(birthday) {
+      this.$refs.menu.save(birthday)
+    },
   },
 }
 </script>

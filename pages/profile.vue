@@ -19,7 +19,9 @@
           <v-icon color="green lighten-1">mdi-check-all</v-icon>
         </v-card-title>
         <v-card-subtitle class="text-center">
-          <v-chip color="teal lighten-2" small>29 Years Old</v-chip>
+          <v-chip color="teal lighten-2" small>{{
+            $auth.user.date_of_birth
+          }}</v-chip>
         </v-card-subtitle>
         <v-card-text class="text-center">
           <div>{{ $auth.user.email }}</div>

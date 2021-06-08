@@ -83,8 +83,9 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+import { mapActions } from 'vuex'
 export default {
+  name: 'Default',
   data() {
     return {
       clipped: false,
@@ -114,7 +115,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations({
+    ...mapActions({
       logout: 'users/logout',
     }),
   },

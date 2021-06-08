@@ -3,12 +3,13 @@
 import colors from 'vuetify/es5/util/colors'
 
 export default {
-  // server: {
-  //   https: {
-  //     key: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.key')),
-  //     cert: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.pem')),
-  //   },
-  // },
+  server: {
+    port: 3000,
+    // https: {
+    //   key: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.key')),
+    //   cert: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.pem')),
+    // },
+  },
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: '%s - client',
@@ -51,13 +52,13 @@ export default {
   axios: {
     baseURL: 'http://biker.test',
     credentials: true,
-    // headers: {
-    //   common: {
-    //     Accept: 'application/json, text/plain, */*',
-    //   },
-    //   'X-Requested-With': 'XMLHttpRequest',
-    //   'Content-Type': 'application/json',
-    // },
+    headers: {
+      common: {
+        Accept: 'application/json, text/plain, */*',
+      },
+      // 'X-Requested-With': 'XMLHttpRequest',
+      'Content-Type': 'application/json',
+    },
   },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
@@ -81,6 +82,10 @@ export default {
           },
           user: {
             url: '/api/user',
+          },
+          register: {
+            url: 'api/register',
+            method: 'post',
           },
         },
         user: {

@@ -10,9 +10,8 @@
             <v-form>
               <v-text-field label="Email"></v-text-field>
               <v-text-field label="Password"></v-text-field>
-              <v-card-actions>
-                <span class="caption align-center">
-                  Don't Have an Account ?
+              <v-card-actions class="pa-0">
+                <v-row class="caption align-center">
                   <v-btn
                     to="register"
                     text
@@ -21,7 +20,16 @@
                     class="text-capitalize"
                     >Register</v-btn
                   >
-                </span>
+                  <span>Or</span>
+                  <v-btn
+                    to="register"
+                    text
+                    small
+                    color="teal"
+                    class="text-capitalize"
+                    >reset password</v-btn
+                  >
+                </v-row>
                 <v-spacer></v-spacer>
                 <v-btn color="teal darken-3" class="mx-center" @click="login()"
                   >Submit</v-btn
@@ -36,7 +44,7 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+import { mapActions } from 'vuex'
 
 export default {
   middleware: ['guest'],
@@ -49,7 +57,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations({
+    ...mapActions({
       login: 'users/login',
     }),
   },
