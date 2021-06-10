@@ -7,30 +7,18 @@ export const state = () => ({
   nik: null,
   date_of_birth: null,
   phone_number: null,
+  is_admin: null,
   editedIndex: -1,
-  editedItem: {
-    name: null,
-    email: null,
-    nik: null,
-    phone_number: null,
-    date_of_birth: null,
-  },
   users: [],
   alert: false,
   timeout: 10000,
   color: 'success',
   error: [],
+  dialog: false,
+  dialogDelete: false,
+  snackbar: false,
   success: '',
-  roles: [
-    {
-      id: 1,
-      name: 'Committee',
-    },
-    {
-      id: 2,
-      name: 'Participant',
-    },
-  ],
+  loading: false,
 })
 
 export const getters = {
@@ -47,7 +35,7 @@ export const actions = {
   async login({ state }) {
     await this.$auth.loginWith('laravelSanctum', {
       data: {
-        email: 'dedrick26@example.org',
+        email: 'brielle.trantow@example.org',
         password: 'password',
       },
     })
@@ -70,19 +58,24 @@ export const actions = {
         nik: state.nik,
         phone_number: state.phone_number,
         date_of_birth: state.date_of_birth,
-        // imageId: state.imageId,
+        is_admin: state.is_admin,
       })
-      .then(() => {
-        commit('SET_ALERT', true)
-        commit('SET_COLOR', 'success')
-        commit('SET_TEXT_SUCCESS', 'Registration Successfull')
+      .then((data) => {
+        commit('SET_SAVE_USER', data)
+        commit('SET_DIALOG', state.dialog)
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_TEXT_SUCCESS', 'Registration Successfully')
+        commit('SET_ALERT', false)
+        commit('SET_ADMIN')
+        commit('SET_LOADING', state.loading)
       })
       .catch((error) => {
-        // console.error(error.response.data.errors)
         commit('SET_ALERT', true)
         commit('SET_COLOR', 'error')
         commit('SET_TEXT_SUCCESS', null)
         commit('SET_TEXT_ERROR', error.response.data.errors)
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_LOADING', state.loading)
       })
   },
 
@@ -95,10 +88,29 @@ export const actions = {
         nik: state.nik,
         phone_number: state.phone_number,
         date_of_birth: state.date_of_birth,
+        is_admin: state.is_admin,
       })
       .then((data) => {
-        commit('SET_UPDATE_USER', data)
+        commit('SET_SAVE_USER', data)
+        commit('SET_INDEX', -1)
+        commit('SET_DIALOG', state.dialog)
+        commit('SET_COLOR', 'teal darken-3')
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_TEXT_SUCCESS', 'Updated Successfully')
+        commit('SET_LOADING', state.loading)
+        commit('SET_ADMIN')
       })
+  },
+  deleteUser({ state, commit }) {
+    this.$axios.$get('/sanctum/csrf-cookie')
+    this.$axios.$delete(`api/user/${state.id}`).then(() => {
+      commit('SET_DELETE_USER')
+      commit('SET_INDEX', -1)
+      commit('SET_DIALOG_DELETE', state.dialogDelete)
+      commit('SET_COLOR', 'teal darken-3')
+      commit('SET_SNACKBAR', state.snackbar)
+      commit('SET_TEXT_SUCCESS', 'Deleted Successfully')
+    })
   },
 }
 
@@ -122,16 +134,23 @@ export const mutations = {
   SET_NIK(state, nik) {
     state.nik = nik
   },
-  SET_IMAGE_ID(state, imageId) {
-    state.imageId = imageId
+  SET_ADMIN(state, is_admin) {
+    state.is_admin = is_admin
   },
-
   SET_USERS(state, users) {
     state.users = users
   },
 
-  SET_UPDATE_USER(state, user) {
-    Object.assign(state.users[state.editedIndex], user)
+  SET_SAVE_USER(state, user) {
+    if (state.editedIndex > -1) {
+      Object.assign(state.users[state.editedIndex], user)
+    } else {
+      state.users.unshift(user)
+    }
+  },
+
+  SET_DELETE_USER(state) {
+    state.users.splice(state.editedIndex, 1)
   },
 
   SET_INDEX(state, index) {
@@ -154,7 +173,18 @@ export const mutations = {
     state.color = color
   },
 
-  SET_ROLE(state, roles) {
-    state.roles.name = roles
+  SET_DIALOG(state, dialog) {
+    state.dialog = !dialog
+  },
+  SET_DIALOG_DELETE(state, dialogDelete) {
+    state.dialogDelete = !dialogDelete
+  },
+
+  SET_SNACKBAR(state, snackbar) {
+    state.snackbar = !snackbar
+  },
+
+  SET_LOADING(state, loading) {
+    state.loading = !loading
   },
 }

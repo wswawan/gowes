@@ -4,15 +4,20 @@
       <v-card>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="teal darken-3">edit</v-btn>
+          <v-btn color="teal darken-3" small>edit</v-btn>
         </v-card-actions>
         <v-divider class="pb-2"></v-divider>
-        <v-img
+        <!-- <v-img
           class="rounded-lg mx-auto"
           width="250"
           height="250"
           src="https://cdn.vuetifyjs.com/images/cards/cooking.png"
-        ></v-img>
+        ></v-img> -->
+        <v-card-text>
+          <h1 class="display-1 text-center text-uppercase teal pa-2">
+            {{ $auth.user.uuid }}
+          </h1>
+        </v-card-text>
 
         <v-card-title class="justify-center">
           {{ $auth.user.name }}

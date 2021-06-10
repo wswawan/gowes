@@ -3,9 +3,9 @@
     <v-col cols="12" md="6" sm="8">
       <v-form>
         <v-file-input
-          v-model="file"
+          v-model="image"
           label="Upload Image Here"
-          name="file"
+          name="image"
           @change="setImage"
         ></v-file-input>
         <v-btn @click.prevent="fileUpload">Submit</v-btn>
@@ -20,22 +20,22 @@
 export default {
   data() {
     return {
-      file: null,
+      image: null,
     }
   },
 
   methods: {
-    setImage(file) {
-      this.file = file
+    setImage(image) {
+      this.image = image
     },
 
     async fileUpload() {
       // eslint-disable-next-line prefer-const
       let formData = new FormData()
-      formData.append('imageId', this.file)
+      formData.append('image', this.image)
       await this.$axios.$get('/sanctum/csrf-cookie')
       await this.$axios
-        .$post('/api/uploadfile', formData, {
+        .$post('/api/upload', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

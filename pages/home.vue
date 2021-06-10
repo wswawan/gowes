@@ -2,7 +2,7 @@
   <v-row justify="center" align="center">
     <v-col cols="12" sm="8" md="6">
       <v-card>
-        <v-card-title>Hi John</v-card-title>
+        <v-card-title>Hi {{ $auth.user.name }}</v-card-title>
         <v-card-subtitle class="subtitle-1">
           Welcome to the Timeline
         </v-card-subtitle>
@@ -79,7 +79,7 @@
           <v-timeline v-for="n in 10" :key="n" align-top dense>
             <v-timeline-item small color="teal">
               <v-row>
-                <v-col cols="3">
+                <v-col cols="4">
                   <v-btn small class="teal darken-3">
                     {{ n + 10 }}.40
                   </v-btn></v-col
