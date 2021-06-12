@@ -313,34 +313,33 @@ export default {
       this.selected = this.$store.state.users.is_admin
     },
     deleteItem(item) {
-      console.log(item)
+      // console.log(item)
       this.$store.commit('users/SET_DIALOG_DELETE', this.dialogDelete)
       this.$store.commit('users/SET_INDEX', this.users.indexOf(item))
       this.$store.commit('users/SET_ID', item.id)
     },
-    async saveUser() {
+    saveUser() {
       if (this.$store.state.users.editedIndex > -1) {
         if (this.$refs.form.validate()) {
-          await this.$store.commit('users/SET_LOADING', this.loading)
+          this.$store.commit('users/SET_LOADING', this.loading)
           setTimeout(() => {
             this.updateUser()
-            this.$refs.form.resetValidation()
-            this.$refs.form.reset()
           }, 1000)
           setTimeout(() => {
             this.$store.commit('users/SET_SNACKBAR', this.snackbar)
+            this.$refs.form.resetValidation()
+            this.$refs.form.reset()
           }, 4100)
         }
       } else if (this.$store.state.users.editedIndex === -1) {
         if (this.$refs.form.validate()) {
-          await this.$store.commit('users/SET_LOADING', this.loading)
+          this.$store.commit('users/SET_LOADING', this.loading)
           setTimeout(() => {
             this.register()
-            this.$refs.form.resetValidation()
-            // await this.$refs.form.reset()
           })
           setTimeout(() => {
             this.$store.commit('users/SET_SNACKBAR', this.snackbar)
+            this.$refs.form.resetValidation()
           }, 5100)
         }
       }
@@ -349,19 +348,19 @@ export default {
       await this.deleteUser()
       setTimeout(() => {
         this.$store.commit('users/SET_SNACKBAR', this.snackbar)
-      }, 2000)
+      }, 4100)
     },
     close() {
       this.$store.commit('users/SET_DIALOG', this.dialog)
+      this.$refs.form.reset()
       if (this.editedIndex > -1) {
         this.$store.commit('users/SET_INDEX', -1)
-        this.$refs.form.reset()
       }
     },
-    async closeDelete() {
-      await this.$store.commit('users/SET_DIALOG_DELETE', this.dialogDelete)
-      await this.$store.commit('users/SET_ID', null)
-      await this.$store.commit('users/SET_INDEX', -1)
+    closeDelete() {
+      this.$store.commit('users/SET_DIALOG_DELETE', this.dialogDelete)
+      this.$store.commit('users/SET_ID', null)
+      this.$store.commit('users/SET_INDEX', -1)
     },
   },
 }

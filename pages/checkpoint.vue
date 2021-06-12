@@ -7,7 +7,7 @@
         :items="checkpoints"
         :loading="!checkpoints.length"
         :search="search"
-        item-key="name"
+        item-key="id"
         fixed-header
       >
         <template #top>
@@ -21,18 +21,25 @@
             ></v-text-field>
             <v-dialog :value="dialog" max-width="500px" persistent>
               <template #activator="{ on, attrs }">
-                <v-btn small color="primary" v-bind="attrs" v-on="on"
+                <v-btn
+                  small
+                  color="primary"
+                  v-bind="attrs"
+                  v-on="on"
+                  @click.prevent="open"
                   >create</v-btn
                 >
               </template>
               <v-card>
                 <v-toolbar dense color="grey darken-2">
-                  <v-toolbar-title>formTitle</v-toolbar-title>
+                  <v-toolbar-title>{{
+                    editedIndex ? 'Create Checkpoint' : 'Update Checkpoint'
+                  }}</v-toolbar-title>
                   <v-spacer></v-spacer>
                   <v-btn small class="mx-center" @click="close">Back</v-btn>
                 </v-toolbar>
-                <v-card-text>
-                  <v-form ref="form" v-model="valid" lazy-validation>
+                <v-form ref="form" v-model="valid" lazy-validation>
+                  <v-card-text>
                     <v-text-field
                       :value="name"
                       :rules="rules.name"
@@ -48,19 +55,22 @@
                       @input="SET_DESCRIPTION"
                     ></v-text-field>
                     <v-autocomplete
-                      dense
-                      :value="user_id"
+                      v-model="select"
+                      :value="user"
                       :rules="rules.pic"
                       required
                       label="Select PIC"
                       :items="userAdmin"
                       item-text="name"
                       item-value="id"
-                      @change="SET_USER_ID"
-                    ></v-autocomplete>
+                      return-object
+                      @change="SET_USER"
+                    >
+                    </v-autocomplete>
                     <v-divider></v-divider>
                     <v-card-actions class="px-0">
                       <v-btn
+                        :loading="loading"
                         class="mx-center"
                         color="teal darken-3"
                         small
@@ -69,34 +79,88 @@
                         >Submit</v-btn
                       >
                     </v-card-actions>
-                  </v-form>
-                </v-card-text>
+                  </v-card-text>
+                </v-form>
+              </v-card>
+            </v-dialog>
+            <v-dialog :value="dialogDelete" max-width="500px" persistent>
+              <v-card color="grey darken-3">
+                <v-card-title class="text-subtitle-1 justify-center">
+                  Are you sure delete this item?
+                </v-card-title>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="blue darken-1" text @click="closeDelete"
+                    >Cancel</v-btn
+                  >
+                  <v-btn color="blue darken-1" text @click="destroyCheckpoint"
+                    >OK</v-btn
+                  >
+                  <v-spacer></v-spacer>
+                </v-card-actions>
               </v-card>
             </v-dialog>
           </v-toolbar>
         </template>
-        <template #[`item.actions`]="{ item }">
-          <v-icon class="mr-2" @click="item">mdi-pencil</v-icon>
-          <v-icon @click="item">mdi-delete</v-icon>
+        <template #[`item.qrcode_url`]="{ item }">
+          <v-btn
+            small
+            class="mx-center"
+            color="blue"
+            text
+            :href="`https://biker.test/storage/${item.qrcode_url}`"
+            :download="item.name"
+            >download
+          </v-btn>
         </template>
-        <template #expanded-item="{ headers, item }">
-          <td :colspan="headers.length">{{ item.description }}</td>
+        <template #[`item.actions`]="{ item }">
+          <v-icon class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+          <v-icon @click="deleteItem(item)">mdi-delete</v-icon>
         </template>
       </v-data-table>
+
+      <v-snackbar :value="snackbar" :timeout="timeout" :color="color">
+        <v-btn text small><v-icon>mdi-information-outline</v-icon></v-btn>
+        <span v-if="success">
+          {{ success }}
+        </span>
+        <span v-if="error">
+          {{ error }}
+        </span>
+        <!-- <div v-else>
+          <ul v-for="(item, i) in error" :key="i">
+            <li>{{ item[0] }}</li>
+          </ul>
+        </div> -->
+
+        <!-- <template #action="{ attrs }">
+          <v-btn
+            color="black"
+            text
+            v-bind="attrs"
+            @click="SET_SNACKBAR(snackbar)"
+          >
+            Close
+          </v-btn>
+        </template> -->
+      </v-snackbar>
     </v-container>
   </v-layout>
 </template>
 
 <script>
+/* eslint-disable no-console */
+
 import { mapGetters, mapActions, mapState, mapMutations } from 'vuex'
 
 export default {
   middleware: 'auth',
   data: () => ({
+    timeout: 4000,
     valid: false,
     search: '',
-    dialog: null,
     form: null,
+    select: {},
     rules: {
       name: [
         (v) => !!v || 'Checkpoint name is required',
@@ -107,8 +171,10 @@ export default {
       description: [
         (v) => !!v || 'Checkpoint description is required',
         (v) =>
-          (v && v.length >= 3) ||
-          'Checkpoint description must be 3 characters or more',
+          (v && v.length >= 3) || 'Description must be 3 characters or more',
+        (v) =>
+          (v && v.length <= 30) ||
+          'Description must be less than or 30 characters',
       ],
       pic: [(v) => !!v || 'PIC is required'],
     },
@@ -128,6 +194,11 @@ export default {
         value: 'user.name',
       },
       {
+        text: 'QRCode',
+        value: 'qrcode_url',
+      },
+
+      {
         text: 'Actions',
         sortable: false,
         align: 'center',
@@ -136,7 +207,20 @@ export default {
     ],
   }),
   computed: {
-    ...mapState('checkpoints', ['name', 'description', 'user_id']),
+    ...mapState('checkpoints', [
+      'name',
+      'description',
+      'qrcode_url',
+      'user',
+      'dialog',
+      'loading',
+      'snackbar',
+      'error',
+      'success',
+      'color',
+      'editedIndex',
+      'dialogDelete',
+    ]),
     ...mapGetters({
       checkpoints: 'checkpoints/checkpoints',
       users: 'users/users',
@@ -145,6 +229,7 @@ export default {
       return this.$store.state.users.users.filter((user) => user.is_admin)
     },
   },
+
   mounted() {
     this.fetchCheckpoints()
     this.fetchUsers()
@@ -154,20 +239,93 @@ export default {
       fetchCheckpoints: 'checkpoints/fetchCheckpoints',
       fetchUsers: 'users/fetchUsers',
       createCheckpoint: 'checkpoints/createCheckpoint',
+      updateCheckpoint: 'checkpoints/updateCheckpoint',
+      deleteCheckpoint: 'checkpoints/deleteCheckpoint',
     }),
     ...mapMutations('checkpoints', [
       'SET_NAME',
       'SET_DESCRIPTION',
-      'SET_USER_ID',
+      'SET_USER',
+      'SET_QRCODE_URL',
+      'SET_COLOR',
+      'SET_DIALOG',
+      'SET_LOADING',
+      'SET_SNACKBAR',
+      'SET_TEXT_SUCCESS',
+      'SET_INDEX',
     ]),
-    close() {
-      this.dialog = false
-      this.$refs.form.reset()
-      this.$refs.form.resetValidation()
+    open() {
+      this.$store.commit('checkpoints/SET_DIALOG', this.dialog)
+      setTimeout(() => {
+        this.$refs.form.reset()
+      }, 100)
     },
-    async saveCheckpoint() {
-      await this.createCheckpoint()
-      await this.$refs.form.reset()
+    close() {
+      this.$store.commit('checkpoints/SET_DIALOG', this.dialog)
+      this.$refs.form.resetValidation()
+      this.$refs.form.reset()
+      if (this.editedIndex > -1) {
+        this.$store.commit('checkpoints/SET_INDEX', -1)
+      }
+    },
+    saveCheckpoint() {
+      if (this.$store.state.checkpoints.editedIndex > -1) {
+        if (this.$refs.form.validate()) {
+          this.$store.commit('checkpoints/SET_LOADING', this.loading)
+          setTimeout(() => {
+            this.updateCheckpoint()
+          }, 1000)
+          setTimeout(() => {
+            this.$store.commit('checkpoints/SET_SNACKBAR', this.snackbar)
+            this.$refs.form.resetValidation()
+            this.$refs.form.reset()
+          }, 4100)
+        }
+      }
+      if (this.$store.state.checkpoints.editedIndex === -1) {
+        if (this.$refs.form.validate()) {
+          this.$store.commit('checkpoints/SET_LOADING', this.loading)
+          setTimeout(() => {
+            this.createCheckpoint()
+          })
+          setTimeout(() => {
+            this.$refs.form.resetValidation()
+            this.$store.commit('checkpoints/SET_SNACKBAR', this.snackbar)
+          }, 5100)
+        }
+      }
+    },
+    editItem(item) {
+      this.$store.commit(
+        'checkpoints/SET_INDEX',
+        this.checkpoints.indexOf(item)
+      )
+      this.$store.commit('checkpoints/SET_DIALOG', this.dialog)
+      this.$store.commit('checkpoints/SET_ID', item.id)
+      this.$store.commit('checkpoints/SET_NAME', item.name)
+      this.$store.commit('checkpoints/SET_DESCRIPTION', item.description)
+      this.$store.commit('checkpoints/SET_USER', item.user)
+      this.select = item.user
+    },
+    deleteItem(item) {
+      this.$store.commit('checkpoints/SET_DIALOG_DELETE', this.dialogDelete)
+      this.$store.commit(
+        'checkpoints/SET_INDEX',
+        this.checkpoints.indexOf(item)
+      )
+      this.$store.commit('checkpoints/SET_ID', item.id)
+      this.$store.commit('checkpoints/SET_QRCODE_URL', item.qrcode_url)
+    },
+    closeDelete() {
+      this.$store.commit('checkpoints/SET_DIALOG_DELETE', this.dialogDelete)
+      this.$store.commit('checkpoints/SET_ID', null)
+      this.$store.commit('checkpoints/SET_INDEX', -1)
+    },
+    async destroyCheckpoint() {
+      await this.deleteCheckpoint()
+      setTimeout(() => {
+        this.$store.commit('checkpoints/SET_SNACKBAR', this.snackbar)
+      }, 2000)
     },
   },
 }

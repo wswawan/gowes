@@ -35,7 +35,7 @@ export const actions = {
   async login({ state }) {
     await this.$auth.loginWith('laravelSanctum', {
       data: {
-        email: 'brielle.trantow@example.org',
+        email: 'marvin.nienow@example.org',
         password: 'password',
       },
     })
@@ -65,12 +65,10 @@ export const actions = {
         commit('SET_DIALOG', state.dialog)
         commit('SET_SNACKBAR', state.snackbar)
         commit('SET_TEXT_SUCCESS', 'Registration Successfully')
-        commit('SET_ALERT', false)
-        commit('SET_ADMIN')
+        commit('SET_RESET')
         commit('SET_LOADING', state.loading)
       })
       .catch((error) => {
-        commit('SET_ALERT', true)
         commit('SET_COLOR', 'error')
         commit('SET_TEXT_SUCCESS', null)
         commit('SET_TEXT_ERROR', error.response.data.errors)
@@ -103,14 +101,23 @@ export const actions = {
   },
   deleteUser({ state, commit }) {
     this.$axios.$get('/sanctum/csrf-cookie')
-    this.$axios.$delete(`api/user/${state.id}`).then(() => {
-      commit('SET_DELETE_USER')
-      commit('SET_INDEX', -1)
-      commit('SET_DIALOG_DELETE', state.dialogDelete)
-      commit('SET_COLOR', 'teal darken-3')
-      commit('SET_SNACKBAR', state.snackbar)
-      commit('SET_TEXT_SUCCESS', 'Deleted Successfully')
-    })
+    this.$axios
+      .$delete(`api/user/${state.id}`)
+      .then(() => {
+        commit('SET_DELETE_USER')
+        commit('SET_INDEX', -1)
+        commit('SET_DIALOG_DELETE', state.dialogDelete)
+        commit('SET_COLOR', 'teal darken-3')
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_TEXT_SUCCESS', 'Deleted Successfully')
+      })
+      .catch((error) => {
+        console.log(error)
+        commit('SET_DIALOG_DELETE', state.dialogDelete)
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_COLOR', 'error')
+        commit('SET_TEXT_SUCCESS', error.response.data)
+      })
   },
 }
 
@@ -147,6 +154,16 @@ export const mutations = {
     } else {
       state.users.unshift(user)
     }
+  },
+  SET_RESET(state) {
+    state.id = null
+    state.name = null
+    state.email = null
+    state.nik = null
+    state.date_of_birth = null
+    state.phone_number = null
+    state.is_admin = null
+    // state.editedIndex = -1
   },
 
   SET_DELETE_USER(state) {
