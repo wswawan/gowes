@@ -3,7 +3,8 @@
 export const state = () => ({
   id: null,
   name: null,
-  email: null,
+  password: 'password',
+  email: 'anahi86@example.net',
   nik: null,
   date_of_birth: null,
   phone_number: null,
@@ -12,11 +13,11 @@ export const state = () => ({
   users: [],
   alert: false,
   timeout: 10000,
-  color: 'success',
-  error: [],
   dialog: false,
   dialogDelete: false,
   snackbar: false,
+  color: 'success',
+  error: [],
   success: '',
   loading: false,
 })
@@ -32,13 +33,27 @@ export const actions = {
     const users = await this.$axios.$get('/api/users')
     commit('SET_USERS', users)
   },
-  async login({ state }) {
-    await this.$auth.loginWith('laravelSanctum', {
-      data: {
-        email: 'marvin.nienow@example.org',
-        password: 'password',
-      },
-    })
+  async login({ state, commit }) {
+    await this.$auth
+      .loginWith('laravelSanctum', {
+        data: {
+          email: state.email,
+          password: state.password,
+        },
+      })
+      .then(() => {
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_TEXT_SUCCESS', 'Login Successfully')
+        commit('SET_RESET')
+        commit('SET_LOADING', state.loading)
+      })
+      .catch((err) => {
+        commit('SET_COLOR', 'error')
+        commit('SET_TEXT_SUCCESS', null)
+        commit('SET_TEXT_ERROR', err.response.data.errors)
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_LOADING', state.loading)
+      })
   },
 
   async logout() {
@@ -64,7 +79,8 @@ export const actions = {
         commit('SET_SAVE_USER', data)
         commit('SET_DIALOG', state.dialog)
         commit('SET_SNACKBAR', state.snackbar)
-        commit('SET_TEXT_SUCCESS', 'Registration Successfully')
+        commit('SET_COLOR', 'teal darken-3')
+        commit('SET_TEXT_SUCCESS', 'Password sent to your email')
         commit('SET_RESET')
         commit('SET_LOADING', state.loading)
       })
@@ -132,6 +148,9 @@ export const mutations = {
   SET_EMAIL(state, email) {
     state.email = email
   },
+  SET_PASSWORD(state, password) {
+    state.password = password
+  },
   SET_PHONE_NUMBER(state, phone_number) {
     state.phone_number = phone_number
   },
@@ -159,6 +178,7 @@ export const mutations = {
     state.id = null
     state.name = null
     state.email = null
+    state.password = null
     state.nik = null
     state.date_of_birth = null
     state.phone_number = null

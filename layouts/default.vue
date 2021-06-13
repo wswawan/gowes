@@ -70,14 +70,14 @@
       fixed
       app
     >
-      <v-btn to="home"
+      <v-btn to="/home"
         ><span>Home</span><v-icon>mdi-home-outline</v-icon></v-btn
       >
-      <v-btn to="checkin">
+      <v-btn to="/checkin">
         <span>CheckIn</span>
         <v-icon>mdi-fingerprint</v-icon>
       </v-btn>
-      <v-btn to="profile">
+      <v-btn to="/profile">
         <span>Profile</span>
         <v-icon>mdi-account-cowboy-hat</v-icon>
       </v-btn>

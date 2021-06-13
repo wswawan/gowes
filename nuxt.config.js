@@ -3,13 +3,14 @@
 import colors from 'vuetify/es5/util/colors'
 
 export default {
-  server: {
-    port: 3000,
-    // https: {
-    //   key: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.key')),
-    //   cert: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.pem')),
-    // },
-  },
+  target: 'static',
+  // server: {
+  //   port: 3000,
+  //   https: {
+  //     key: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.key')),
+  //     cert: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.pem')),
+  //   },
+  // },
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: '%s - client',
@@ -26,7 +27,7 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: [{ src: '@/plugins/qrcode.js', mode: 'client' }],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -50,7 +51,7 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: 'http://biker.test',
+    baseURL: 'https://biker.test',
     credentials: true,
     headers: {
       common: {
@@ -72,7 +73,7 @@ export default {
     strategies: {
       laravelSanctum: {
         provider: 'laravel/sanctum',
-        url: 'http://biker.test',
+        url: 'https://biker.test',
         endpoints: {
           login: {
             url: '/api/login',
@@ -91,6 +92,8 @@ export default {
         user: {
           property: false,
         },
+        tokenRequired: false,
+        tokenType: false,
       },
     },
     redirect: {

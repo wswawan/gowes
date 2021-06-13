@@ -168,17 +168,6 @@
             <li>{{ item[0] }}</li>
           </ul>
         </div>
-
-        <!-- <template #action="{ attrs }">
-          <v-btn
-            color="black"
-            text
-            v-bind="attrs"
-            @click="SET_SNACKBAR(snackbar)"
-          >
-            Close
-          </v-btn>
-        </template> -->
       </v-snackbar>
     </v-container>
   </v-layout>

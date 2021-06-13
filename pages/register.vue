@@ -108,6 +108,19 @@
           </v-form>
         </v-card-text>
       </v-card>
+      <v-snackbar :value="snackbar" timeout="5000" :color="color">
+        <v-btn v-if="success" text small
+          ><v-icon>mdi-information-outline</v-icon></v-btn
+        >
+        <span v-if="success">
+          {{ success }}
+        </span>
+        <div v-else>
+          <ul v-for="(item, i) in error" :key="i">
+            <li>{{ item[0] }}</li>
+          </ul>
+        </div>
+      </v-snackbar>
     </v-col>
   </v-row>
 </template>
@@ -157,6 +170,7 @@ export default {
       'color',
       'error',
       'success',
+      'snackbar',
     ]),
   },
   watch: {
@@ -167,8 +181,14 @@ export default {
   methods: {
     async submitUser() {
       if (this.$refs.form.validate()) {
-        await this.register()
+        this.$store.commit('users/SET_LOADING', this.loading)
+        setTimeout(() => {
+          this.register()
+        }, 2000)
         await this.$refs.form.resetValidation()
+        setTimeout(() => {
+          this.$store.commit('users/SET_SNACKBAR', this.snackbar)
+        }, 4000)
       }
     },
     ...mapActions({
