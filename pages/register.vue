@@ -38,16 +38,26 @@
               required
               @input="SET_PHONE_NUMBER"
             ></v-text-field>
-            <!-- <v-text-field
+            <v-text-field
               :value="password"
+              :rules="rules.password"
+              :type="show ? 'text' : 'password'"
+              :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
               label="Password"
-              type="password"
+              @click:append="show = !show"
+              @input="SET_PASSWORD"
             ></v-text-field>
             <v-text-field
-              :value="confirm"
+              v-model="passwordConfirm"
+              :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="show1 ? 'text' : 'password'"
+              :rules="[
+                (v) => !!v || 'Password confirmation is required',
+                (v) => v === password || 'Password doesn\'t match',
+              ]"
               label="Confirm Password"
-              type="password"
-            ></v-text-field> -->
+              @click:append="show1 = !show1"
+            ></v-text-field>
             <v-text-field
               :value="nik"
               :rules="rules.nik"
@@ -99,6 +109,7 @@
               <v-spacer></v-spacer>
               <v-btn
                 :disabled="!valid"
+                :loading="loading"
                 color="teal darken-3"
                 class="mx-center"
                 @click.prevent="submitUser"
@@ -108,7 +119,7 @@
           </v-form>
         </v-card-text>
       </v-card>
-      <v-snackbar :value="snackbar" timeout="5000" :color="color">
+      <v-snackbar :value="snackbar" timeout="4000" :color="color">
         <v-btn v-if="success" text small
           ><v-icon>mdi-information-outline</v-icon></v-btn
         >
@@ -136,6 +147,9 @@ export default {
     valid: true,
     menu: false,
     activePicker: null,
+    passwordConfirm: null,
+    show: false,
+    show1: false,
     rules: {
       name: [
         (v) => !!v || 'Name is required',
@@ -144,6 +158,10 @@ export default {
       email: [
         (v) => !!v || 'Email is required',
         (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+      ],
+      password: [
+        (v) => !!v || 'Password is required',
+        (v) => (v && v.length >= 6) || 'Password must be 6 characters or more',
       ],
       phoneNumber: [
         (v) => !!v || 'Phone number is required',
@@ -162,6 +180,7 @@ export default {
     ...mapState('users', [
       'name',
       'email',
+      'password',
       'nik',
       'phone_number',
       'date_of_birth',
@@ -170,6 +189,7 @@ export default {
       'color',
       'error',
       'success',
+      'loading',
       'snackbar',
     ]),
   },
@@ -177,18 +197,24 @@ export default {
     menu(val) {
       val && setTimeout(() => (this.activePicker = 'YEAR'))
     },
+    snackbar(val) {
+      val &&
+        setTimeout(
+          () => this.$store.commit('users/SET_SNACKBAR', this.snackbar),
+          4500
+        )
+    },
   },
   methods: {
-    async submitUser() {
+    submitUser() {
       if (this.$refs.form.validate()) {
         this.$store.commit('users/SET_LOADING', this.loading)
         setTimeout(() => {
-          this.register()
-        }, 2000)
-        await this.$refs.form.resetValidation()
-        setTimeout(() => {
-          this.$store.commit('users/SET_SNACKBAR', this.snackbar)
-        }, 4000)
+          this.register().then(() => {
+            this.$refs.form.resetValidation()
+            this.$refs.form.reset()
+          })
+        }, 1000)
       }
     },
     ...mapActions({
@@ -197,6 +223,7 @@ export default {
     ...mapMutations('users', [
       'SET_NAME',
       'SET_EMAIL',
+      'SET_PASSWORD',
       'SET_PHONE_NUMBER',
       'SET_NIK',
       'SET_BIRTHDAY',

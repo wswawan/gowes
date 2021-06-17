@@ -79,6 +79,7 @@ export const actions = {
       commit('SET_INDEX', -1)
       commit('SET_DIALOG_DELETE', state.dialogDelete)
       commit('SET_COLOR', 'teal darken-3')
+      commit('SET_LOADING', state.loading)
       commit('SET_SNACKBAR', state.snackbar)
       commit('SET_TEXT_SUCCESS', 'Deleted Successfully')
     })

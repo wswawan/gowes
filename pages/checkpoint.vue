@@ -1,6 +1,6 @@
 <template>
   <v-layout justify-center>
-    <v-container>
+    <v-container class="pa-0">
       <!-- {{ userAdmin }} -->
       <v-data-table
         :headers="CheckPointHeaders"
@@ -93,7 +93,11 @@
                   <v-btn color="blue darken-1" text @click="closeDelete"
                     >Cancel</v-btn
                   >
-                  <v-btn color="blue darken-1" text @click="destroyCheckpoint"
+                  <v-btn
+                    small
+                    color="teal darken-1"
+                    :loading="loading"
+                    @click="destroyCheckpoint"
                     >OK</v-btn
                   >
                   <v-spacer></v-spacer>
@@ -108,7 +112,7 @@
             class="mx-center"
             color="blue"
             text
-            :href="`https://biker.test/storage/${item.qrcode_url}`"
+            :href="`https://back.afalclo.id/public/${item.qrcode_url}`"
             :download="item.name"
             >download
           </v-btn>
@@ -229,7 +233,15 @@ export default {
       return this.$store.state.users.users.filter((user) => user.is_admin)
     },
   },
-
+  watch: {
+    snackbar(val) {
+      val &&
+        setTimeout(
+          () => this.$store.commit('checkpoints/SET_SNACKBAR', this.snackbar),
+          4500
+        )
+    },
+  },
   mounted() {
     this.fetchCheckpoints()
     this.fetchUsers()
@@ -276,7 +288,6 @@ export default {
             this.updateCheckpoint()
           }, 1000)
           setTimeout(() => {
-            this.$store.commit('checkpoints/SET_SNACKBAR', this.snackbar)
             this.$refs.form.resetValidation()
             this.$refs.form.reset()
           }, 4100)
@@ -287,11 +298,7 @@ export default {
           this.$store.commit('checkpoints/SET_LOADING', this.loading)
           setTimeout(() => {
             this.createCheckpoint()
-          })
-          setTimeout(() => {
-            this.$refs.form.resetValidation()
-            this.$store.commit('checkpoints/SET_SNACKBAR', this.snackbar)
-          }, 5100)
+          }, 1000)
         }
       }
     },
@@ -321,11 +328,11 @@ export default {
       this.$store.commit('checkpoints/SET_ID', null)
       this.$store.commit('checkpoints/SET_INDEX', -1)
     },
-    async destroyCheckpoint() {
-      await this.deleteCheckpoint()
+    destroyCheckpoint() {
+      this.$store.commit('checkpoints/SET_LOADING', this.loading)
       setTimeout(() => {
-        this.$store.commit('checkpoints/SET_SNACKBAR', this.snackbar)
-      }, 2000)
+        this.deleteCheckpoint()
+      }, 1000)
     },
   },
 }

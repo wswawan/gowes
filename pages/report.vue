@@ -1,11 +1,11 @@
 <template>
   <v-layout justify-center>
-    <v-container>
+    <v-container class="pa-0">
       <v-data-table
         :headers="participantsHeaders"
-        :items="items"
+        :items="checkIn"
         :search="search"
-        item-key="participants"
+        item-key="id"
         fixed-header
       >
         <template #top>
@@ -22,11 +22,11 @@
             <v-toolbar-title class="subtitle-1">Report</v-toolbar-title>
           </v-toolbar>
         </template>
-        <template #[`item.achievement`]="{ item }">
+        <template #[`item.qrscans`]="{ item }">
           <v-dialog width="500">
             <template #activator="{ attrs, on }">
               <v-btn small v-bind="attrs" color="teal" v-on="on"
-                >{{ item.achievement }}
+                >{{ item.qrscans.length }}
                 <v-icon>mdi-flag-checkered</v-icon>
               </v-btn>
             </template>
@@ -36,10 +36,12 @@
             <v-card>
               <v-card-text class="py-4">
                 <v-row
-                  v-for="checkpoint in item.checkpoints"
+                  v-for="checkpoint in item.qrscans"
                   :key="checkpoint.name"
+                  justify="center"
+                  align="center"
                 >
-                  <v-col cols="6">{{ checkpoint.name }}</v-col>
+                  <v-col cols="6">{{ checkpoint.checkpoint.name }}</v-col>
                   <v-col cols="6">{{ checkpoint.time }}</v-col>
                 </v-row>
               </v-card-text>
@@ -56,84 +58,52 @@
 </template>
 
 <script>
+import { mapState, mapActions, mapGetters, mapMutations } from 'vuex'
 export default {
   middleware: 'auth',
-  data() {
-    return {
-      search: '',
-      dialog: null,
-      form: null,
-      participantsHeaders: [
-        {
-          text: 'Participants',
-          align: 'start',
-          value: 'participants',
-        },
-        {
-          text: 'Phone Numer',
-          value: 'phoneNumber',
-        },
-        {
-          text: 'Achievement',
-          value: 'achievement',
-          align: 'center',
-        },
-        {
-          text: 'Actions',
-          sortable: false,
-          value: 'actions',
-        },
-      ],
-      items: [
-        {
-          participants: 'John Doe',
-          phoneNumber: '298347190293',
-          achievement: 9,
-          checkpoints: [
-            {
-              name: 'checkpoint 1',
-              time: '10.20',
-            },
-            {
-              name: 'checkpoint 2',
-              time: '11.20',
-            },
-          ],
-        },
-        {
-          participants: 'Jane Doe',
-          phoneNumber: '03284021943804',
-          achievement: 11,
-          role: 'committee',
-          checkpoints: [
-            {
-              name: 'checkpoint 10',
-              time: '10.20',
-            },
-            {
-              name: 'checkpoint 20',
-              time: '11.20',
-            },
-          ],
-        },
-        {
-          participants: 'Good People',
-          phoneNumber: '09214819412',
-          achievement: 15,
-          role: 'participants',
-          checkpoints: [
-            {
-              name: 'checkpoint 11',
-              time: '10.20',
-            },
-            {
-              name: 'checkpoint 12',
-              time: '11.20',
-            },
-          ],
-        },
-      ],
-    }
+  data: () => ({
+    search: '',
+    participantsHeaders: [
+      {
+        text: 'Participants',
+        align: 'start',
+        value: 'name',
+      },
+      {
+        text: 'Phone Numer',
+        value: 'phone',
+      },
+      {
+        text: 'Achievement',
+        value: 'qrscans',
+        align: 'center',
+      },
+      // {
+      //   text: 'Actions',
+      //   sortable: false,
+      //   value: 'actions',
+      // },
+    ],
+  }),
+  computed: {
+    ...mapGetters({
+      summary: 'qrscans/summary',
+    }),
+    ...mapState('qrscans', ['summary']),
+    checkIn() {
+      return this.$store.state.qrscans.summary.filter(
+        (item) => item.qrscans.length > 1
+      )
+    },
+  },
+  mounted() {
+    this.fetchSummary()
+  },
+  methods: {
+    ...mapActions({
+      fetchSummary: 'qrscans/fetchSummary',
+    }),
+    ...mapMutations('qrscans', ['SET_SUMMARY']),
   },
 }
 </script>

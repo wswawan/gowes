@@ -33,7 +33,7 @@
                     class="text-capitalize"
                     >Register</v-btn
                   >
-                  <span>Or</span>
+                  <!-- <span>Or</span>
                   <v-btn
                     to="register"
                     text
@@ -41,7 +41,7 @@
                     color="teal"
                     class="text-capitalize"
                     >reset password</v-btn
-                  >
+                  > -->
                 </v-row>
                 <v-spacer></v-spacer>
                 <v-btn
@@ -53,18 +53,21 @@
                   >Submit</v-btn
                 >
               </v-card-actions>
-              <v-snackbar :value="snackbar" timeout="5000" :color="color">
-                <v-btn v-if="success" text small
+              <v-snackbar :value="snackbar" timeout="4000" :color="color">
+                <v-btn text small
                   ><v-icon>mdi-information-outline</v-icon></v-btn
                 >
                 <span v-if="success">
                   {{ success }}
                 </span>
-                <div v-else>
+                <span v-else>
+                  {{ error }}
+                </span>
+                <!-- <div v-else>
                   <ul v-for="(item, i) in error" :key="i">
                     <li>{{ item[0] }}</li>
                   </ul>
-                </div>
+                </div> -->
 
                 <!-- <template #action="{ attrs }">
           <v-btn
@@ -86,6 +89,7 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 import { mapActions, mapState, mapMutations } from 'vuex'
 
 export default {
@@ -116,6 +120,15 @@ export default {
       'error',
     ]),
   },
+  watch: {
+    snackbar(val) {
+      val &&
+        setTimeout(
+          () => this.$store.commit('users/SET_SNACKBAR', this.snackbar),
+          4200
+        )
+    },
+  },
   methods: {
     ...mapActions({
       login: 'users/login',
@@ -126,10 +139,13 @@ export default {
         this.$store.commit('users/SET_LOADING', this.loading)
         setTimeout(() => {
           this.login()
+            .then(() => {
+              this.$refs.form.resetValidation()
+            })
+            .catch((error) => {
+              console.log(error)
+            })
         }, 1000)
-        setTimeout(() => {
-          this.$store.commit('users/SET_SNACKBAR', this.snackbar)
-        }, 5100)
       }
     },
   },

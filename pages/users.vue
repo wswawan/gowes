@@ -1,6 +1,6 @@
 <template>
   <v-layout justify-center>
-    <v-container>
+    <v-container class="pa-0">
       <v-data-table
         :headers="usersHeaders"
         :items="users"
@@ -39,7 +39,7 @@
                   <v-btn small class="mx-center" @click="close">Back</v-btn>
                 </v-toolbar>
                 <!-- <v-card-text v-if="alert"> </v-card-text> -->
-                <v-card-text>
+                <v-card-text class="px-3">
                   <!-- <v-alert :value="alert" :color="color" dense border="top">
                     <div v-for="(items, index) in error" :key="index">
                       <v-list-item-subtitle
@@ -63,6 +63,28 @@
                       :rules="rules.email"
                       required
                       @input="SET_EMAIL"
+                    ></v-text-field>
+                    <v-text-field
+                      v-if="editedIndex"
+                      :value="password"
+                      :rules="rules.password"
+                      :type="show ? 'text' : 'password'"
+                      :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                      label="Password"
+                      @click:append="show = !show"
+                      @input="SET_PASSWORD"
+                    ></v-text-field>
+                    <v-text-field
+                      v-if="editedIndex"
+                      v-model="passwordConfirm"
+                      :type="show1 ? 'text' : 'password'"
+                      :rules="[
+                        (v) => !!v || 'Password confirmation is required',
+                        (v) => v === password || 'Password doesn\'t match',
+                      ]"
+                      :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                      label="Confirm Password"
+                      @click:append="show1 = !show1"
                     ></v-text-field>
                     <v-text-field
                       :value="phone_number"
@@ -110,10 +132,9 @@
                     </v-menu>
 
                     <v-switch
-                      v-model="selected"
                       :value="is_admin"
                       label="Admin"
-                      @change="SET_ADMIN(!is_admin)"
+                      @change="SET_ADMIN"
                     ></v-switch>
                     <v-divider></v-divider>
                     <v-card-actions class="px-0">
@@ -142,7 +163,11 @@
                   <v-btn color="blue darken-1" text @click="closeDelete"
                     >Cancel</v-btn
                   >
-                  <v-btn color="blue darken-1" text @click="destroyUser"
+                  <v-btn
+                    small
+                    :loading="loading"
+                    color="teal darken-1"
+                    @click="destroyUser"
                     >OK</v-btn
                   >
                   <v-spacer></v-spacer>
@@ -151,12 +176,16 @@
             </v-dialog>
           </v-toolbar>
         </template>
+        <template #[`item.is_admin`]="{ item }">
+          <span v-if="item.is_admin">Committee</span>
+          <span v-else>Participants</span>
+        </template>
         <template #[`item.actions`]="{ item }">
           <v-icon class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
           <v-icon @click="deleteItem(item)">mdi-delete</v-icon>
         </template>
       </v-data-table>
-      <v-snackbar :value="snackbar" timeout="5000" :color="color">
+      <v-snackbar :value="snackbar" timeout="4000" :color="color">
         <v-btn v-if="success" text small
           ><v-icon>mdi-information-outline</v-icon></v-btn
         >
@@ -184,6 +213,9 @@ export default {
     valid: true,
     menu: false,
     activePicker: null,
+    show: false,
+    show1: false,
+    passwordConfirm: null,
     search: '',
     form: null,
     rules: {
@@ -194,6 +226,10 @@ export default {
       email: [
         (v) => !!v || 'Email is required',
         (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+      ],
+      password: [
+        (v) => !!v || 'Password is required',
+        (v) => (v && v.length >= 6) || 'Password must be 6 characters or more',
       ],
       phoneNumber: [
         (v) => !!v || 'Phone number is required',
@@ -209,7 +245,7 @@ export default {
     },
     usersHeaders: [
       {
-        text: 'Full Name',
+        text: 'Name',
         align: 'start',
         value: 'name',
       },
@@ -220,6 +256,10 @@ export default {
       {
         text: 'Phone Number',
         value: 'phone_number',
+      },
+      {
+        text: 'Role',
+        value: 'is_admin',
       },
       {
         text: 'Actions',
@@ -237,6 +277,7 @@ export default {
     ...mapState('users', [
       'name',
       'email',
+      'password',
       'nik',
       'phone_number',
       'date_of_birth',
@@ -256,6 +297,13 @@ export default {
     menu(val) {
       val && setTimeout(() => (this.activePicker = 'YEAR'))
     },
+    snackbar(val) {
+      val &&
+        setTimeout(
+          () => this.$store.commit('users/SET_SNACKBAR', this.snackbar),
+          4500
+        )
+    },
   },
   mounted() {
     this.fetchUser()
@@ -270,6 +318,7 @@ export default {
     ...mapMutations('users', [
       'SET_NAME',
       'SET_EMAIL',
+      'SET_PASSWORD',
       'SET_PHONE_NUMBER',
       'SET_NIK',
       'SET_BIRTHDAY',
@@ -282,14 +331,8 @@ export default {
     save(birthday) {
       this.$refs.menu.save(birthday)
     },
-    // async submitUser() {
-    //   if (this.$refs.form.validate()) {
-    //     await this.register()
-    //     await this.$refs.form.resetValidation()
-    //   }
-    // },
+
     editItem(item) {
-      // console.log(item)
       this.$store.commit('users/SET_DIALOG', this.dialog)
       this.$store.commit('users/SET_INDEX', this.users.indexOf(item))
       this.$store.commit('users/SET_ID', item.id)
@@ -299,10 +342,8 @@ export default {
       this.$store.commit('users/SET_NIK', item.nik)
       this.$store.commit('users/SET_BIRTHDAY', item.date_of_birth)
       this.$store.commit('users/SET_ADMIN', item.is_admin)
-      this.selected = this.$store.state.users.is_admin
     },
     deleteItem(item) {
-      // console.log(item)
       this.$store.commit('users/SET_DIALOG_DELETE', this.dialogDelete)
       this.$store.commit('users/SET_INDEX', this.users.indexOf(item))
       this.$store.commit('users/SET_ID', item.id)
@@ -315,7 +356,6 @@ export default {
             this.updateUser()
           }, 1000)
           setTimeout(() => {
-            this.$store.commit('users/SET_SNACKBAR', this.snackbar)
             this.$refs.form.resetValidation()
             this.$refs.form.reset()
           }, 4100)
@@ -327,17 +367,16 @@ export default {
             this.register()
           })
           setTimeout(() => {
-            this.$store.commit('users/SET_SNACKBAR', this.snackbar)
             this.$refs.form.resetValidation()
           }, 5100)
         }
       }
     },
-    async destroyUser() {
-      await this.deleteUser()
+    destroyUser() {
+      this.$store.commit('users/SET_LOADING', this.loading)
       setTimeout(() => {
-        this.$store.commit('users/SET_SNACKBAR', this.snackbar)
-      }, 4100)
+        this.deleteUser()
+      }, 1000)
     },
     close() {
       this.$store.commit('users/SET_DIALOG', this.dialog)

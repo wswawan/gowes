@@ -3,12 +3,13 @@
 export const state = () => ({
   id: null,
   name: null,
-  password: 'password',
-  email: 'anahi86@example.net',
+  email: null,
+  password: null,
+  new_password: null,
   nik: null,
   date_of_birth: null,
   phone_number: null,
-  is_admin: null,
+  is_admin: 0,
   editedIndex: -1,
   users: [],
   alert: false,
@@ -42,15 +43,13 @@ export const actions = {
         },
       })
       .then(() => {
-        commit('SET_SNACKBAR', state.snackbar)
-        commit('SET_TEXT_SUCCESS', 'Login Successfully')
-        commit('SET_RESET')
         commit('SET_LOADING', state.loading)
+        commit('SET_RESET')
       })
       .catch((err) => {
         commit('SET_COLOR', 'error')
         commit('SET_TEXT_SUCCESS', null)
-        commit('SET_TEXT_ERROR', err.response.data.errors)
+        commit('SET_TEXT_ERROR', err.response.data.message)
         commit('SET_SNACKBAR', state.snackbar)
         commit('SET_LOADING', state.loading)
       })
@@ -70,6 +69,7 @@ export const actions = {
       .$post('/api/register', {
         name: state.name,
         email: state.email,
+        password: state.password,
         nik: state.nik,
         phone_number: state.phone_number,
         date_of_birth: state.date_of_birth,
@@ -80,8 +80,7 @@ export const actions = {
         commit('SET_DIALOG', state.dialog)
         commit('SET_SNACKBAR', state.snackbar)
         commit('SET_COLOR', 'teal darken-3')
-        commit('SET_TEXT_SUCCESS', 'Password sent to your email')
-        commit('SET_RESET')
+        commit('SET_TEXT_SUCCESS', 'Registration Successful')
         commit('SET_LOADING', state.loading)
       })
       .catch((error) => {
@@ -110,9 +109,33 @@ export const actions = {
         commit('SET_DIALOG', state.dialog)
         commit('SET_COLOR', 'teal darken-3')
         commit('SET_SNACKBAR', state.snackbar)
-        commit('SET_TEXT_SUCCESS', 'Updated Successfully')
+        commit('SET_TEXT_SUCCESS', 'Update Successful')
         commit('SET_LOADING', state.loading)
         commit('SET_ADMIN')
+      })
+  },
+
+  updatePassword({ state, commit }) {
+    this.$axios.$get('/sanctum/csrf-cookie')
+    this.$axios
+      .$post('api/profile/update_password', {
+        password: state.password,
+        new_password: state.new_password,
+      })
+      .then(() => {
+        commit('SET_COLOR', 'teal darken-3')
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_TEXT_SUCCESS', 'Update Successful')
+        commit('SET_PASSWORD')
+        commit('SET_NEW_PASSWORD')
+        commit('SET_DIALOG', state.dialog)
+        commit('SET_LOADING', state.loading)
+      })
+      .catch((err) => {
+        commit('SET_COLOR', 'error')
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_TEXT_SUCCESS', err.response.data.message)
+        commit('SET_LOADING', state.loading)
       })
   },
   deleteUser({ state, commit }) {
@@ -123,12 +146,13 @@ export const actions = {
         commit('SET_DELETE_USER')
         commit('SET_INDEX', -1)
         commit('SET_DIALOG_DELETE', state.dialogDelete)
+        commit('SET_LOADING', state.loading)
         commit('SET_COLOR', 'teal darken-3')
         commit('SET_SNACKBAR', state.snackbar)
-        commit('SET_TEXT_SUCCESS', 'Deleted Successfully')
+        commit('SET_TEXT_SUCCESS', 'Delete Successful')
       })
       .catch((error) => {
-        console.log(error)
+        commit('SET_LOADING', state.loading)
         commit('SET_DIALOG_DELETE', state.dialogDelete)
         commit('SET_SNACKBAR', state.snackbar)
         commit('SET_COLOR', 'error')
@@ -150,6 +174,9 @@ export const mutations = {
   },
   SET_PASSWORD(state, password) {
     state.password = password
+  },
+  SET_NEW_PASSWORD(state, new_password) {
+    state.new_password = new_password
   },
   SET_PHONE_NUMBER(state, phone_number) {
     state.phone_number = phone_number

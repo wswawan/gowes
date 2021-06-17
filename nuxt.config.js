@@ -6,16 +6,17 @@ export default {
   target: 'static',
   ssr: false,
   // server: {
+  //   host: '0.0.0.0',
   //   port: 3000,
-  //   https: {
-  //     key: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.key')),
-  //     cert: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.pem')),
-  //   },
+  // https: {
+  //   key: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.key')),
+  //   cert: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.pem')),
+  // },
   // },
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - client',
-    title: 'client',
+    titleTemplate: '%s - Gowes',
+    title: 'Gowes',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -52,7 +53,7 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: 'https://biker.test',
+    baseURL: 'https://back.afalclo.id',
     credentials: true,
     headers: {
       common: {
@@ -74,7 +75,7 @@ export default {
     strategies: {
       laravelSanctum: {
         provider: 'laravel/sanctum',
-        url: 'https://biker.test',
+        url: 'https://back.afalclo.id',
         endpoints: {
           login: {
             url: '/api/login',
