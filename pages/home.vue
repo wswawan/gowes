@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-container>
+    <v-container class="pa-0">
       <v-row justify="center" align="center">
         <v-carousel height="300">
           <v-carousel-item

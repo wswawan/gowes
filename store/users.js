@@ -10,6 +10,7 @@ export const state = () => ({
   date_of_birth: null,
   phone_number: null,
   is_admin: 0,
+  profile_image: null,
   editedIndex: -1,
   users: [],
   alert: false,
@@ -92,6 +93,13 @@ export const actions = {
       })
   },
 
+  updateProfileImage({ state }) {
+    const formData = new FormData()
+    formData.append('profile_image', state.profile_image)
+    this.$axios.$get('/sanctum/csrf-cookie')
+    this.$axios.$post('api/profile_image', formData)
+  },
+
   updateUser({ state, commit }) {
     this.$axios.$get('/sanctum/csrf-cookie')
     this.$axios
@@ -118,7 +126,7 @@ export const actions = {
   updatePassword({ state, commit }) {
     this.$axios.$get('/sanctum/csrf-cookie')
     this.$axios
-      .$post('api/profile/update_password', {
+      .$post('api/update_password', {
         password: state.password,
         new_password: state.new_password,
       })
@@ -189,6 +197,9 @@ export const mutations = {
   },
   SET_ADMIN(state, is_admin) {
     state.is_admin = is_admin
+  },
+  SET_PROFILE_IMAGE(state, profile_image) {
+    state.profile_image = profile_image
   },
   SET_USERS(state, users) {
     state.users = users

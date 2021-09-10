@@ -4,60 +4,51 @@
       <v-col cols="12" md="4" sm="4">
         <v-btn icon x-large to="home"><v-icon>mdi-home-outline</v-icon></v-btn>
         <v-card-text class="pa-0">
-          <v-card-title class="display-1">Hi!</v-card-title>
-          <v-card-subtitle>Create a new account</v-card-subtitle>
+          <v-card-title class="display-1">Welcome!</v-card-title>
+          <v-card-subtitle>Sign in to continue</v-card-subtitle>
         </v-card-text>
         <v-card-text>
-          <v-alert :value="alert" :color="color" dense border="top">
-            <div v-for="(items, index) in error" :key="index">
-              <v-list-item-subtitle v-for="(item, id) in items" :key="id">{{
-                item
-              }}</v-list-item-subtitle>
-            </div>
-            {{ success }}
-          </v-alert>
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-text-field
-              :value="name"
-              :rules="rules.name"
-              label="Name"
-              required
-              @input="SET_NAME"
-            ></v-text-field>
-            <v-text-field
-              :value="email"
-              label="Email"
               :rules="rules.email"
-              required
+              label="Email"
+              :value="email"
               @input="SET_EMAIL"
             ></v-text-field>
             <v-text-field
-              :value="password"
-              :rules="rules.password"
-              :type="show ? 'text' : 'password'"
-              :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
               label="Password"
+              :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="show ? 'text' : 'password'"
+              :rules="rules.password"
+              :value="password"
               @click:append="show = !show"
               @input="SET_PASSWORD"
             ></v-text-field>
-            <v-text-field
-              v-model="passwordConfirm"
-              :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
-              :type="show1 ? 'text' : 'password'"
-              :rules="[
-                (v) => !!v || 'Password confirmation is required',
-                (v) => v === password || 'Password doesn\'t match',
-              ]"
-              label="Confirm Password"
-              @click:append="show1 = !show1"
-            ></v-text-field>
+            <v-snackbar :value="snackbar" timeout="4000" :color="color">
+              <v-btn text small><v-icon>mdi-information-outline</v-icon></v-btn>
+              <span v-if="success">
+                {{ success }}
+              </span>
+              <span v-else>
+                {{ error }}
+              </span>
+            </v-snackbar>
           </v-form>
         </v-card-text>
         <v-card-actions>
           <v-row dense justify="center">
             <v-col cols="12" class="text-center">
-              <v-btn color="indigo darken-3" width="250" @click="submitUser"
-                >sign up</v-btn
+              <v-btn
+                color="indigo darken-3"
+                width="250"
+                :loading="loading"
+                @click="submitLogin"
+                >login</v-btn
+              >
+            </v-col>
+            <v-col align-self="center" class="text-center">
+              <v-btn text class="text-capitalize caption"
+                >Forgot Password?</v-btn
               >
             </v-col>
           </v-row>
@@ -75,13 +66,13 @@
         </v-card-text>
         <v-card-text class="pa-0">
           <v-card-subtitle class="caption"
-            >Already have an account?
+            >Don't have an account?
             <v-btn
               text
               class="text-capitalize caption"
               color="primary"
-              to="login"
-              >sign in</v-btn
+              to="register"
+              >signup</v-btn
             ></v-card-subtitle
           >
         </v-card-text>
@@ -92,23 +83,14 @@
 
 <script>
 /* eslint-disable no-console */
-
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState, mapMutations } from 'vuex'
 
 export default {
   middleware: ['guest'],
   data: () => ({
     valid: true,
-    menu: false,
-    activePicker: null,
-    passwordConfirm: null,
     show: false,
-    show1: false,
     rules: {
-      name: [
-        (v) => !!v || 'Name is required',
-        (v) => (v && v.length >= 3) || 'Name must be 3 characters or more',
-      ],
       email: [
         (v) => !!v || 'Email is required',
         (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
@@ -121,54 +103,46 @@ export default {
   }),
   computed: {
     ...mapState('users', [
-      'name',
       'email',
       'password',
-      'alert',
-      'color',
-      'error',
-      'success',
       'loading',
       'snackbar',
+      'snackbar',
+      'color',
+      'success',
+      'error',
     ]),
   },
   watch: {
-    menu(val) {
-      val && setTimeout(() => (this.activePicker = 'YEAR'))
-    },
     snackbar(val) {
       val &&
         setTimeout(
           () => this.$store.commit('users/SET_SNACKBAR', this.snackbar),
-          4500
+          4200
         )
     },
   },
   methods: {
-    submitUser() {
+    ...mapActions({
+      login: 'users/login',
+    }),
+    ...mapMutations('users', ['SET_EMAIL', 'SET_PASSWORD']),
+    submitLogin() {
       if (this.$refs.form.validate()) {
         this.$store.commit('users/SET_LOADING', this.loading)
         setTimeout(() => {
-          this.register().then(() => {
-            this.$refs.form.resetValidation()
-            this.$refs.form.reset()
-          })
+          this.login()
+            .then(() => {
+              this.$refs.form.resetValidation()
+            })
+            .catch((error) => {
+              console.log(error)
+            })
         }, 1000)
       }
-    },
-    ...mapActions({
-      register: 'users/register',
-    }),
-    ...mapMutations('users', [
-      'SET_NAME',
-      'SET_EMAIL',
-      'SET_PASSWORD',
-      'SET_ALERT',
-    ]),
-    save(birthday) {
-      this.$refs.menu.save(birthday)
     },
   },
 }
 </script>
+
 <style></style>

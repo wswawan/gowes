@@ -3,15 +3,15 @@
 import colors from 'vuetify/es5/util/colors'
 
 export default {
-  target: 'static',
-  ssr: false,
+  // target: 'static',
+  // ssr: false,
   // server: {
   //   host: '0.0.0.0',
   //   port: 3000,
-  // https: {
-  //   key: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.key')),
-  //   cert: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.pem')),
-  // },
+  //   https: {
+  //     key: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.key')),
+  //     cert: fs.readFileSync(path.resolve('C:/Users/Ws', 'RootCA.pem')),
+  //   },
   // },
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -53,7 +53,7 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: 'https://back.afalclo.id',
+    baseURL: 'http://biker.test',
     credentials: true,
     headers: {
       common: {
@@ -75,7 +75,7 @@ export default {
     strategies: {
       laravelSanctum: {
         provider: 'laravel/sanctum',
-        url: 'https://back.afalclo.id',
+        url: 'http://biker.test',
         endpoints: {
           login: {
             url: '/api/login',

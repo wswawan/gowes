@@ -46,7 +46,7 @@
       </v-btn>
     </v-app-bar>
     <v-main>
-      <v-container class="fill-height">
+      <v-container fill-height>
         <nuxt />
       </v-container>
     </v-main>
@@ -65,7 +65,7 @@
     </v-footer> -->
     <v-bottom-navigation
       v-if="$auth.loggedIn"
-      background-color="teal"
+      background-color="indigo"
       grow
       fixed
       app
@@ -77,9 +77,13 @@
         <span>CheckIn</span>
         <v-icon>mdi-fingerprint</v-icon>
       </v-btn>
-      <v-btn to="/profile">
-        <span>Profile</span>
-        <v-icon>mdi-account-cowboy-hat</v-icon>
+      <v-btn to="/event">
+        <span>Event</span>
+        <v-icon>mdi-calendar-outline</v-icon>
+      </v-btn>
+      <v-btn to="/setting">
+        <span>Setting</span>
+        <v-icon>mdi-dots-horizontal</v-icon>
       </v-btn>
     </v-bottom-navigation>
   </v-app>

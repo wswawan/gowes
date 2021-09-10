@@ -5,7 +5,6 @@
       <v-data-table
         :headers="CheckPointHeaders"
         :items="checkpoints"
-        :loading="!checkpoints.length"
         :search="search"
         item-key="id"
         fixed-header
@@ -19,6 +18,7 @@
               single-line
               hide-details
             ></v-text-field>
+            <v-spacer></v-spacer>
             <v-dialog :value="dialog" max-width="500px" persistent>
               <template #activator="{ on, attrs }">
                 <v-btn
@@ -112,7 +112,7 @@
             class="mx-center"
             color="blue"
             text
-            :href="`https://back.afalclo.id/public/${item.qrcode_url}`"
+            :href="`http://biker.test/${item.qrcode_url}`"
             :download="item.name"
             >download
           </v-btn>

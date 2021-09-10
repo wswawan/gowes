@@ -38,8 +38,8 @@ export const actions = {
         commit('SET_LOADING', state.loading)
       })
   },
-  async fetchQrscans({ commit }) {
-    await this.$axios.$get('/api/qrscans').then((data) => {
+  fetchQrscans({ commit }) {
+    this.$axios.$get('/api/qrscans').then((data) => {
       commit('SET_QRSCANS', data)
     })
   },
