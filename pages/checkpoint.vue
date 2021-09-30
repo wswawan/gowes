@@ -26,7 +26,7 @@
                   color="primary"
                   v-bind="attrs"
                   v-on="on"
-                  @click.prevent="open"
+                  @click.prevent="SET_DIALOG(dialog)"
                   >create</v-btn
                 >
               </template>
@@ -72,8 +72,7 @@
                       <v-btn
                         :loading="loading"
                         class="mx-center"
-                        color="teal darken-3"
-                        small
+                        color="indigo darken-3"
                         block
                         @click.prevent="saveCheckpoint"
                         >Submit</v-btn
@@ -90,12 +89,9 @@
                 </v-card-title>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text @click="closeDelete"
-                    >Cancel</v-btn
-                  >
+                  <v-btn text @click="closeDelete">Cancel</v-btn>
                   <v-btn
-                    small
-                    color="teal darken-1"
+                    color="indigo darken-1"
                     :loading="loading"
                     @click="destroyCheckpoint"
                     >OK</v-btn
@@ -112,7 +108,7 @@
             class="mx-center"
             color="blue"
             text
-            :href="`http://biker.test/${item.qrcode_url}`"
+            :href="`http://biker.test/storage/qrcode/${item.qrcode_url}`"
             :download="item.name"
             >download
           </v-btn>
@@ -252,7 +248,7 @@ export default {
       fetchUsers: 'users/fetchUsers',
       createCheckpoint: 'checkpoints/createCheckpoint',
       updateCheckpoint: 'checkpoints/updateCheckpoint',
-      deleteCheckpoint: 'checkpoints/deleteCheckpoint',
+      destroyCheckpoint: 'checkpoints/deleteCheckpoint',
     }),
     ...mapMutations('checkpoints', [
       'SET_NAME',
@@ -266,12 +262,6 @@ export default {
       'SET_TEXT_SUCCESS',
       'SET_INDEX',
     ]),
-    open() {
-      this.$store.commit('checkpoints/SET_DIALOG', this.dialog)
-      setTimeout(() => {
-        this.$refs.form.reset()
-      }, 100)
-    },
     close() {
       this.$store.commit('checkpoints/SET_DIALOG', this.dialog)
       this.$refs.form.resetValidation()
@@ -283,22 +273,15 @@ export default {
     saveCheckpoint() {
       if (this.$store.state.checkpoints.editedIndex > -1) {
         if (this.$refs.form.validate()) {
-          this.$store.commit('checkpoints/SET_LOADING', this.loading)
-          setTimeout(() => {
-            this.updateCheckpoint()
-          }, 1000)
-          setTimeout(() => {
+          this.updateCheckpoint().then(() => {
             this.$refs.form.resetValidation()
             this.$refs.form.reset()
-          }, 4100)
+          })
         }
       }
       if (this.$store.state.checkpoints.editedIndex === -1) {
         if (this.$refs.form.validate()) {
-          this.$store.commit('checkpoints/SET_LOADING', this.loading)
-          setTimeout(() => {
-            this.createCheckpoint()
-          }, 1000)
+          this.createCheckpoint()
         }
       }
     },
@@ -327,12 +310,6 @@ export default {
       this.$store.commit('checkpoints/SET_DIALOG_DELETE', this.dialogDelete)
       this.$store.commit('checkpoints/SET_ID', null)
       this.$store.commit('checkpoints/SET_INDEX', -1)
-    },
-    destroyCheckpoint() {
-      this.$store.commit('checkpoints/SET_LOADING', this.loading)
-      setTimeout(() => {
-        this.deleteCheckpoint()
-      }, 1000)
     },
   },
 }

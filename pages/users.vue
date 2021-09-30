@@ -65,7 +65,7 @@
                       @input="SET_EMAIL"
                     ></v-text-field>
                     <v-text-field
-                      v-if="editedIndex"
+                      v-if="editedIndex === -1"
                       :value="password"
                       :rules="rules.password"
                       :type="show ? 'text' : 'password'"
@@ -75,7 +75,7 @@
                       @input="SET_PASSWORD"
                     ></v-text-field>
                     <v-text-field
-                      v-if="editedIndex"
+                      v-if="editedIndex === -1"
                       v-model="passwordConfirm"
                       :type="show1 ? 'text' : 'password'"
                       :rules="[
@@ -118,7 +118,7 @@
                           required
                           v-bind="attrs"
                           v-on="on"
-                          @input="SET_BIRTHDAY"
+                          @input="SET_DATE_OF_BIRTH"
                         ></v-text-field>
                       </template>
                       <v-date-picker
@@ -126,24 +126,23 @@
                         :active-picker.sync="activePicker"
                         max="2014-12-31"
                         required
-                        @input="SET_BIRTHDAY"
+                        @input="SET_DATE_OF_BIRTH"
                         @change="save"
                       ></v-date-picker>
                     </v-menu>
 
                     <v-switch
-                      :value="is_admin"
+                      :input-value="is_admin"
                       label="Admin"
                       @change="SET_ADMIN"
                     ></v-switch>
                     <v-divider></v-divider>
                     <v-card-actions class="px-0">
                       <v-btn
-                        small
                         block
                         :loading="loading"
                         :disabled="!valid"
-                        color="teal darken-3"
+                        color="indigo"
                         class="mx-center"
                         @click.prevent="saveUser"
                         >Submit</v-btn
@@ -160,14 +159,8 @@
                 </v-card-title>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text @click="closeDelete"
-                    >Cancel</v-btn
-                  >
-                  <v-btn
-                    small
-                    :loading="loading"
-                    color="teal darken-1"
-                    @click="destroyUser"
+                  <v-btn text @click="closeDelete">Cancel</v-btn>
+                  <v-btn :loading="loading" color="indigo" @click="destroyUser"
                     >OK</v-btn
                   >
                   <v-spacer></v-spacer>
@@ -181,7 +174,12 @@
           <span v-else>Participants</span>
         </template>
         <template #[`item.actions`]="{ item }">
-          <v-icon class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+          <v-btn v-if="$auth.user.id === item.id" text to="setting" x-small>
+            <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+          <v-icon v-else class="mr-2" @click="editItem(item)"
+            >mdi-pencil</v-icon
+          >
           <v-icon @click="deleteItem(item)">mdi-delete</v-icon>
         </template>
       </v-data-table>
@@ -313,7 +311,7 @@ export default {
       fetchUser: 'users/fetchUsers',
       register: 'users/register',
       updateUser: 'users/updateUser',
-      deleteUser: 'users/deleteUser',
+      destroyUser: 'users/deleteUser',
     }),
     ...mapMutations('users', [
       'SET_NAME',
@@ -321,7 +319,7 @@ export default {
       'SET_PASSWORD',
       'SET_PHONE_NUMBER',
       'SET_NIK',
-      'SET_BIRTHDAY',
+      'SET_DATE_OF_BIRTH',
       'SET_ADMIN',
       'SET_ALERT',
       'SET_INDEX',
@@ -340,7 +338,7 @@ export default {
       this.$store.commit('users/SET_EMAIL', item.email)
       this.$store.commit('users/SET_PHONE_NUMBER', item.phone_number)
       this.$store.commit('users/SET_NIK', item.nik)
-      this.$store.commit('users/SET_BIRTHDAY', item.date_of_birth)
+      this.$store.commit('users/SET_DATE_OF_BIRTH', item.date_of_birth)
       this.$store.commit('users/SET_ADMIN', item.is_admin)
     },
     deleteItem(item) {
@@ -350,33 +348,26 @@ export default {
     },
     saveUser() {
       if (this.$store.state.users.editedIndex > -1) {
-        if (this.$refs.form.validate()) {
-          this.$store.commit('users/SET_LOADING', this.loading)
-          setTimeout(() => {
-            this.updateUser()
-          }, 1000)
-          setTimeout(() => {
-            this.$refs.form.resetValidation()
-            this.$refs.form.reset()
-          }, 4100)
-        }
+        // if (this.$refs.form.validate()) {
+        //   setTimeout(() => {
+        this.updateUser()
+        // }, 1000)
+        // setTimeout(() => {
+        //   this.$refs.form.resetValidation()
+        //   this.$refs.form.reset()
+        // }, 4100)
+        // }
       } else if (this.$store.state.users.editedIndex === -1) {
         if (this.$refs.form.validate()) {
-          this.$store.commit('users/SET_LOADING', this.loading)
-          setTimeout(() => {
-            this.register()
-          })
-          setTimeout(() => {
+          // setTimeout(() => {
+          this.register().then(() => {
             this.$refs.form.resetValidation()
-          }, 5100)
+          })
+          // })
+          // setTimeout(() => {
+          // }, 5100)
         }
       }
-    },
-    destroyUser() {
-      this.$store.commit('users/SET_LOADING', this.loading)
-      setTimeout(() => {
-        this.deleteUser()
-      }, 1000)
     },
     close() {
       this.$store.commit('users/SET_DIALOG', this.dialog)

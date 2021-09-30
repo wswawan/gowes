@@ -11,11 +11,14 @@ export const state = () => ({
   phone_number: null,
   is_admin: 0,
   profile_image: null,
+  old_image: null,
   editedIndex: -1,
   users: [],
   alert: false,
   timeout: 10000,
   dialog: false,
+  dialogAvatar: false,
+  dialogProfile: false,
   dialogDelete: false,
   snackbar: false,
   color: 'success',
@@ -36,6 +39,7 @@ export const actions = {
     commit('SET_USERS', users)
   },
   async login({ state, commit }) {
+    await commit('SET_LOADING', state.loading)
     await this.$auth
       .loginWith('laravelSanctum', {
         data: {
@@ -65,6 +69,7 @@ export const actions = {
   },
 
   async register({ state, commit }) {
+    await commit('SET_LOADING', state.loading)
     await this.$axios.$get('/sanctum/csrf-cookie')
     await this.$axios
       .$post('/api/register', {
@@ -93,16 +98,26 @@ export const actions = {
       })
   },
 
-  updateProfileImage({ state }) {
+  updateProfileImage({ state, commit }) {
     const formData = new FormData()
     formData.append('profile_image', state.profile_image)
+    formData.append('old_image', state.old_image)
     this.$axios.$get('/sanctum/csrf-cookie')
-    this.$axios.$post('api/profile_image', formData)
+    this.$axios.$post('api/profile_image', formData).then((data) => {
+      commit('SET_PROFILE_IMAGE')
+      commit('SET_DIALOG_AVATAR', state.dialogAvatar)
+      commit('SET_SNACKBAR', state.snackbar)
+      commit('SET_TEXT_SUCCESS', 'Update Successful')
+      const updateProfile = { ...this.$auth.user }
+      updateProfile.profile_image = data
+      this.$auth.setUser(updateProfile)
+    })
   },
 
-  updateUser({ state, commit }) {
-    this.$axios.$get('/sanctum/csrf-cookie')
-    this.$axios
+  async updateUser({ state, commit }) {
+    await commit('SET_LOADING', state.loading)
+    await this.$axios.$get('/sanctum/csrf-cookie')
+    await this.$axios
       .$post('api/user/' + state.id, {
         name: state.name,
         email: state.email,
@@ -112,20 +127,38 @@ export const actions = {
         is_admin: state.is_admin,
       })
       .then((data) => {
-        commit('SET_SAVE_USER', data)
+        if (state.dialog) {
+          commit('SET_SAVE_USER', data)
+          commit('SET_DIALOG', state.dialog)
+        } else {
+          commit('SET_DIALOG_PROFILE', state.dialogProfile)
+          const updateProfile = { ...this.$auth.user }
+          updateProfile.name = data.name
+          updateProfile.email = data.email
+          updateProfile.nik = data.nik
+          updateProfile.phone_number = data.phone_number
+          updateProfile.date_of_birth = data.date_of_birth
+          this.$auth.setUser(updateProfile)
+        }
         commit('SET_INDEX', -1)
-        commit('SET_DIALOG', state.dialog)
         commit('SET_COLOR', 'teal darken-3')
         commit('SET_SNACKBAR', state.snackbar)
         commit('SET_TEXT_SUCCESS', 'Update Successful')
         commit('SET_LOADING', state.loading)
-        commit('SET_ADMIN')
+        commit('SET_RESET')
+      })
+      .catch((err) => {
+        commit('SET_COLOR', 'error')
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_TEXT_ERROR', err.response.data.errors)
+        commit('SET_LOADING', state.loading)
       })
   },
 
-  updatePassword({ state, commit }) {
-    this.$axios.$get('/sanctum/csrf-cookie')
-    this.$axios
+  async updatePassword({ state, commit }) {
+    await commit('SET_LOADING', state.loading)
+    await this.$axios.$get('/sanctum/csrf-cookie')
+    await this.$axios
       .$post('api/update_password', {
         password: state.password,
         new_password: state.new_password,
@@ -146,9 +179,10 @@ export const actions = {
         commit('SET_LOADING', state.loading)
       })
   },
-  deleteUser({ state, commit }) {
-    this.$axios.$get('/sanctum/csrf-cookie')
-    this.$axios
+  async deleteUser({ state, commit }) {
+    await commit('SET_LOADING', state.loading)
+    await this.$axios.$get('/sanctum/csrf-cookie')
+    await this.$axios
       .$delete(`api/user/${state.id}`)
       .then(() => {
         commit('SET_DELETE_USER')
@@ -189,7 +223,7 @@ export const mutations = {
   SET_PHONE_NUMBER(state, phone_number) {
     state.phone_number = phone_number
   },
-  SET_BIRTHDAY(state, date_of_birth) {
+  SET_DATE_OF_BIRTH(state, date_of_birth) {
     state.date_of_birth = date_of_birth
   },
   SET_NIK(state, nik) {
@@ -201,12 +235,15 @@ export const mutations = {
   SET_PROFILE_IMAGE(state, profile_image) {
     state.profile_image = profile_image
   },
+  SET_OLD_IMAGE(state, old_image) {
+    state.old_image = old_image
+  },
   SET_USERS(state, users) {
     state.users = users
   },
 
   SET_SAVE_USER(state, user) {
-    if (state.editedIndex > -1) {
+    if (state.editedIndex !== -1) {
       Object.assign(state.users[state.editedIndex], user)
     } else {
       state.users.unshift(user)
@@ -251,6 +288,13 @@ export const mutations = {
   SET_DIALOG(state, dialog) {
     state.dialog = !dialog
   },
+  SET_DIALOG_AVATAR(state, dialogAvatar) {
+    state.dialogAvatar = !dialogAvatar
+  },
+  SET_DIALOG_PROFILE(state, dialogProfile) {
+    state.dialogProfile = !dialogProfile
+  },
+
   SET_DIALOG_DELETE(state, dialogDelete) {
     state.dialogDelete = !dialogDelete
   },

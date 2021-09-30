@@ -56,7 +56,11 @@
         <v-card-actions>
           <v-row dense justify="center">
             <v-col cols="12" class="text-center">
-              <v-btn color="indigo darken-3" width="250" @click="submitUser"
+              <v-btn
+                :loading="loading"
+                color="indigo darken-3"
+                width="250"
+                @click="submitUser"
                 >sign up</v-btn
               >
             </v-col>
@@ -87,6 +91,19 @@
         </v-card-text>
       </v-col>
     </v-row>
+    <v-snackbar :value="snackbar" timeout="4000" :color="color">
+      <v-btn v-if="success" text small
+        ><v-icon>mdi-information-outline</v-icon></v-btn
+      >
+      <span v-if="success">
+        {{ success }}
+      </span>
+      <div v-else>
+        <ul v-for="(item, i) in error" :key="i">
+          <li>{{ item[0] }}</li>
+        </ul>
+      </div>
+    </v-snackbar>
   </v-layout>
 </template>
 
@@ -147,13 +164,10 @@ export default {
   methods: {
     submitUser() {
       if (this.$refs.form.validate()) {
-        this.$store.commit('users/SET_LOADING', this.loading)
-        setTimeout(() => {
-          this.register().then(() => {
-            this.$refs.form.resetValidation()
-            this.$refs.form.reset()
-          })
-        }, 1000)
+        this.register().then(() => {
+          this.$refs.form.resetValidation()
+          this.$refs.form.reset()
+        })
       }
     },
     ...mapActions({

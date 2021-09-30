@@ -30,6 +30,7 @@ export const actions = {
     commit('SET_CHECKPOINTS', checkpoints)
   },
   async createCheckpoint({ state, commit }) {
+    await commit('SET_LOADING', state.loading)
     await this.$axios.$get('/sanctum/csrf-cookie')
     await this.$axios
       .$post('/api/checkpoint', {
@@ -54,6 +55,7 @@ export const actions = {
       })
   },
   async updateCheckpoint({ state, commit }) {
+    await commit('SET_LOADING', state.loading)
     await this.$axios.$get('/sanctum/csrf-cookie')
     await this.$axios
       .$put(`/api/checkpoint/${state.id}`, {
@@ -73,6 +75,7 @@ export const actions = {
   },
 
   async deleteCheckpoint({ state, commit }) {
+    await commit('SET_LOADING', state.loading)
     await this.$axios.$get('/sanctum/csrf-cookie')
     await this.$axios.$delete(`/api/checkpoint/${state.id}`).then(() => {
       commit('SET_DELETE_ITEM')

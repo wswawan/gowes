@@ -77,7 +77,7 @@
         <span>CheckIn</span>
         <v-icon>mdi-fingerprint</v-icon>
       </v-btn>
-      <v-btn to="/event">
+      <v-btn to="/events">
         <span>Event</span>
         <v-icon>mdi-calendar-outline</v-icon>
       </v-btn>

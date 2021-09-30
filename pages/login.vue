@@ -23,6 +23,7 @@
               :value="password"
               @click:append="show = !show"
               @input="SET_PASSWORD"
+              @keypress.enter="submitLogin"
             ></v-text-field>
             <v-snackbar :value="snackbar" timeout="4000" :color="color">
               <v-btn text small><v-icon>mdi-information-outline</v-icon></v-btn>
@@ -129,16 +130,16 @@ export default {
     ...mapMutations('users', ['SET_EMAIL', 'SET_PASSWORD']),
     submitLogin() {
       if (this.$refs.form.validate()) {
-        this.$store.commit('users/SET_LOADING', this.loading)
-        setTimeout(() => {
-          this.login()
-            .then(() => {
-              this.$refs.form.resetValidation()
-            })
-            .catch((error) => {
-              console.log(error)
-            })
-        }, 1000)
+        // this.$store.commit('users/SET_LOADING', this.loading)
+        // setTimeout(() => {
+        this.login()
+          .then(() => {
+            this.$refs.form.resetValidation()
+          })
+          .catch((error) => {
+            console.log(error)
+          })
+        // }, 1000)
       }
     },
   },
