@@ -12,7 +12,9 @@
               <v-card-actions class="pa-0">
                 <v-list-item>
                   <v-list-item-content>
-                    <v-list-item-title>{{ event.title }}</v-list-item-title>
+                    <v-list-item-title class="text-overline">{{
+                      event.title
+                    }}</v-list-item-title>
                     <v-list-item-subtitle>
                       {{
                         new Date(event.start_date).toLocaleDateString('id-ID')
@@ -51,7 +53,7 @@
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </v-card-actions>
-            <v-card-text>
+            <v-card-text class="pt-0">
               <v-card-subtitle class="px-0 title"
                 >{{
                   Intl.NumberFormat('id-ID', {
@@ -213,18 +215,13 @@
             </v-form>
           </v-card>
         </v-dialog>
-        <v-btn
-          v-if="$auth.user.is_admin"
-          small
-          center
-          bottom
-          right
-          fab
-          class="mb-15"
-          fixed
-          to="carts"
-        >
-          <v-badge :content="count" :value="count" color="deep-orange" overlap>
+        <v-btn small center bottom right fab class="mb-15" fixed to="carts">
+          <v-badge
+            :content="countCart"
+            :value="countCart"
+            color="deep-orange"
+            overlap
+          >
             <v-icon>mdi-shopping</v-icon>
           </v-badge>
         </v-btn>
@@ -259,9 +256,15 @@ export default {
       .substr(0, 10),
     fab: true,
   }),
+
   computed: {
+    countCart() {
+      return this.carts.length
+    },
     ...mapGetters({
       events: 'events/events',
+      carts: 'carts/carts',
+      countCart: 'carts/countCart',
     }),
     ...mapState('events', [
       'title',
@@ -287,9 +290,18 @@ export default {
           4500
         )
     },
+    carts() {
+      if (this.carts.length === 0) {
+        localStorage.removeItem('carts')
+      } else {
+        localStorage.setItem('carts', JSON.stringify(this.carts))
+      }
+    },
   },
   mounted() {
     this.fetchEvents()
+    this.fetchCart(this.carts)
+    this.countCarts()
   },
   methods: {
     ...mapActions({
@@ -298,6 +310,9 @@ export default {
       updateEvent: 'events/updateEvent',
       updateImage: 'events/updateImage',
       deleteEvent: 'events/deleteEvent',
+      addToCart: 'carts/addToCart',
+      fetchCart: 'carts/fetchCart',
+      countCarts: 'carts/countCarts',
     }),
     ...mapMutations('events', [
       'SET_TITLE',
@@ -357,9 +372,6 @@ export default {
         this.$store.commit('events/SET_DIALOG_IMAGE', this.dialogImage)
       }
       this.$store.commit('events/SET_RESET_EVENT')
-    },
-    addToCart(item) {
-      this.$store.commit('carts/SET_SAVE_CART', item)
     },
   },
 }

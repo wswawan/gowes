@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 export const state = () => ({
   events: [],
   id: null,
@@ -66,6 +67,14 @@ export const actions = {
         commit('SET_COLOR', 'teal darken-3')
         commit('SET_TEXT_SUCCESS', 'Update Event Successfull')
         commit('SET_RESET_EVENT')
+        if (localStorage.getItem('carts')) {
+          const carts = JSON.parse(localStorage.getItem('carts'))
+          const item = carts.find((item) => item.id === data.id)
+          item.price = Number(data.price)
+          Object.assign(carts.id === item.id, item)
+          localStorage.setItem('carts', JSON.stringify(carts))
+          console.log(carts)
+        }
       })
   },
   async updateImage({ commit, state }) {

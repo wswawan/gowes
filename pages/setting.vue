@@ -135,6 +135,7 @@
                       >
                         <template #activator="{ on, attrs }">
                           <v-text-field
+                            label="Date of birth"
                             :value="date_of_birth"
                             prepend-icon="mdi-calendar"
                             readonly

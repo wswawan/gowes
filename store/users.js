@@ -25,6 +25,7 @@ export const state = () => ({
   error: [],
   success: '',
   loading: false,
+  isProfile: false,
 })
 
 export const getters = {
@@ -201,6 +202,15 @@ export const actions = {
         commit('SET_TEXT_SUCCESS', error.response.data)
       })
   },
+  fillFormCart({ state, commit }) {
+    commit('SET_IS_PROFILE', state.isProfile)
+    commit('SET_NAME', state.isProfile ? this.$auth.user.name : '')
+    commit('SET_EMAIL', state.isProfile ? this.$auth.user.email : '')
+    commit(
+      'SET_PHONE_NUMBER',
+      state.isProfile ? this.$auth.user.phone_number : ''
+    )
+  },
 }
 
 export const mutations = {
@@ -305,5 +315,8 @@ export const mutations = {
 
   SET_LOADING(state, loading) {
     state.loading = !loading
+  },
+  SET_IS_PROFILE(state, isProfile) {
+    state.isProfile = !isProfile
   },
 }

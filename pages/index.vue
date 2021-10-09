@@ -1,7 +1,7 @@
 <template>
   <v-layout fill-height align-center>
     <v-row justify="center" align="center">
-      {{ lists[18] }}
+      {{ lists[15] }}
       <v-col cols="12" sm="4">
         <v-select :items="listVA" item-text="name" item-value="code">
         </v-select>
