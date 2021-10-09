@@ -268,6 +268,7 @@ export const mutations = {
     state.date_of_birth = null
     state.phone_number = null
     state.is_admin = null
+    state.isProfile = false
     // state.editedIndex = -1
   },
 
