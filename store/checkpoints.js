@@ -7,7 +7,7 @@ export const state = () => ({
   name: null,
   description: null,
   qrcode_url: null,
-  user: {
+  pic: {
     id: null,
     name: null,
   },
@@ -36,7 +36,7 @@ export const actions = {
       .$post('/api/checkpoint', {
         name: state.name,
         description: state.description,
-        user_id: state.user.id,
+        user_id: state.pic.id,
       })
       .then((data) => {
         commit('SET_SAVE_CHECKPOINT', data)
@@ -61,7 +61,7 @@ export const actions = {
       .$put(`/api/checkpoint/${state.id}`, {
         name: state.name,
         description: state.description,
-        user_id: state.user.id,
+        user_id: state.pic.id,
       })
       .then((data) => {
         commit('SET_SAVE_CHECKPOINT', data)
@@ -101,23 +101,26 @@ export const mutations = {
   SET_QRCODE_URL(state, qrcode_url) {
     state.qrcode_url = qrcode_url
   },
-  SET_USER(state, user) {
-    state.user.id = user.id
-    state.user.name = user.name
+  SET_PIC(state, item) {
+    state.pic.id = item.id
+    state.pic.name = item.name
   },
 
   SET_RESET(state) {
     state.name = null
     state.description = null
-    state.user.id = null
-    state.user.name = null
   },
 
   SET_CHECKPOINTS(state, checkpoints) {
     state.checkpoints = checkpoints
   },
   SET_SAVE_CHECKPOINT(state, checkpoint) {
-    Object.assign(checkpoint, { 'user.name': state.user.name })
+    Object.assign(checkpoint, {
+      pic: {
+        id: state.pic.id,
+        name: state.pic.name,
+      },
+    })
     if (state.editedIndex > -1) {
       Object.assign(state.checkpoints[state.editedIndex], checkpoint)
     } else {

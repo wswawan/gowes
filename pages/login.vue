@@ -48,7 +48,7 @@
               >
             </v-col>
             <v-col align-self="center" class="text-center">
-              <v-btn text class="text-capitalize caption"
+              <v-btn text class="text-capitalize caption" to="forgot-password"
                 >Forgot Password?</v-btn
               >
             </v-col>
@@ -123,9 +123,13 @@ export default {
         )
     },
   },
+  destroyed() {
+    this.myOrder()
+  },
   methods: {
     ...mapActions({
       login: 'users/login',
+      myOrder: 'orders/myOrder',
     }),
     ...mapMutations('users', ['SET_EMAIL', 'SET_PASSWORD']),
     submitLogin() {

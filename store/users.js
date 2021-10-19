@@ -26,6 +26,7 @@ export const state = () => ({
   success: '',
   loading: false,
   isProfile: false,
+  token: null,
 })
 
 export const getters = {
@@ -49,6 +50,7 @@ export const actions = {
         },
       })
       .then(() => {
+        // location.reload()
         commit('SET_LOADING', state.loading)
         commit('SET_RESET')
       })
@@ -89,6 +91,7 @@ export const actions = {
         commit('SET_COLOR', 'teal darken-3')
         commit('SET_TEXT_SUCCESS', 'Registration Successful')
         commit('SET_LOADING', state.loading)
+        this.$router.push('/login')
       })
       .catch((error) => {
         commit('SET_COLOR', 'error')
@@ -153,6 +156,51 @@ export const actions = {
         commit('SET_SNACKBAR', state.snackbar)
         commit('SET_TEXT_ERROR', err.response.data.errors)
         commit('SET_LOADING', state.loading)
+      })
+  },
+
+  async sendResetLink({ state, commit }) {
+    await commit('SET_LOADING', state.loading)
+    await this.$axios.$get('/sanctum/csrf-cookie')
+    await this.$axios
+      .$post('api/forgot-password', {
+        email: state.email,
+      })
+      .then((data) => {
+        commit('SET_COLOR', 'success')
+        commit('SET_LOADING', state.loading)
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_TEXT_SUCCESS', data.status)
+      })
+      .catch((err) => {
+        commit('SET_COLOR', 'error')
+        commit('SET_LOADING', state.loading)
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_TEXT_ERROR', err.response.data.errors)
+      })
+  },
+
+  async resetPassword({ state, commit }) {
+    await commit('SET_LOADING', state.loading)
+    await this.$axios.$get('/sanctum/csrf-cookie')
+    await this.$axios
+      .$post('/api/reset-password', {
+        token: state.token,
+        email: state.email,
+        password: state.password,
+      })
+      .then(() => {
+        commit('SET_COLOR', 'success')
+        commit('SET_LOADING', state.loading)
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_TEXT_SUCCESS', 'Password reset successfull')
+        this.$router.push('/login')
+      })
+      .catch((err) => {
+        commit('SET_COLOR', 'error')
+        commit('SET_LOADING', state.loading)
+        commit('SET_SNACKBAR', state.snackbar)
+        commit('SET_TEXT_ERROR', err.response.data.message)
       })
   },
 
@@ -319,5 +367,8 @@ export const mutations = {
   },
   SET_IS_PROFILE(state, isProfile) {
     state.isProfile = !isProfile
+  },
+  SET_TOKEN(state, token) {
+    state.token = token
   },
 }

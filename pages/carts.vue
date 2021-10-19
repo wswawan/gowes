@@ -15,34 +15,70 @@
                 label="Same as profile"
                 @click="fillFormCart"
               ></v-checkbox>
-              <v-form>
+              <v-form ref="form" v-model="valid" lazy-validation>
                 <v-text-field
                   label="Fullname"
                   prepend-inner-icon="mdi-card-account-details-outline"
                   :value="name"
+                  :rules="[(v) => !!v || 'Fullname is required']"
                   @change="SET_NAME"
                 ></v-text-field>
                 <v-text-field
                   label="E-Mail"
                   prepend-inner-icon="mdi-at"
                   :value="email"
+                  :rules="[
+                    (v) => !!v || 'Email is required',
+                    (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+                  ]"
                   @change="SET_EMAIL"
                 ></v-text-field>
                 <v-text-field
-                  type="number"
                   label="Phone Number"
                   prepend-inner-icon="mdi-phone-outline"
                   :value="phone_number"
+                  :rules="[
+                    (v) => !!v || 'Phone Number is required',
+                    (v) =>
+                      Number.isInteger(Number(v)) || 'The value must be number',
+                  ]"
                   @change="SET_PHONE_NUMBER"
                 ></v-text-field>
-                <v-select
-                  prepend-inner-icon="mdi-bank-outline"
-                  label="Select Payment"
-                  :items="listsVA"
-                  item-text="name"
-                  item-value="code"
-                  @change="SET_PAYMENT"
-                ></v-select>
+                <v-radio-group
+                  :rules="[(v) => !!v || 'Please Select Payment']"
+                  required
+                >
+                  <v-radio
+                    label="Virtual Account"
+                    value="true"
+                    @click="show = true"
+                  ></v-radio>
+                  <v-select
+                    v-if="show"
+                    prepend-inner-icon="mdi-bank-outline"
+                    label="Select Payment"
+                    :rules="[(v) => !!v || 'Please Select Payment']"
+                    :items="listsVA"
+                    item-text="name"
+                    item-value="code"
+                    @change="SET_PAYMENT"
+                  >
+                  </v-select>
+
+                  <v-radio
+                    label="Alfamart"
+                    value="ALFAMART"
+                    @click="show = false"
+                    @change="SET_PAYMENT('ALFAMART')"
+                  ></v-radio>
+                  <v-radio
+                    label="E-Wallet / QRIS"
+                    value="QRIS"
+                    @click="show = false"
+                    @change="SET_PAYMENT('QRISC')"
+                  ></v-radio>
+                </v-radio-group>
+
                 <v-list-item class="px-0 text-center" two-line>
                   <v-list-item-content>
                     <v-list-item-subtitle>Amount</v-list-item-subtitle>
@@ -56,7 +92,13 @@
                   </v-list-item-content>
                 </v-list-item>
                 <v-card-actions>
-                  <v-btn color="indigo" block>submit</v-btn>
+                  <v-btn
+                    color="indigo"
+                    block
+                    :loading="loading"
+                    @click="createOrder"
+                    >submit</v-btn
+                  >
                 </v-card-actions>
               </v-form>
             </v-card-text>
@@ -64,7 +106,9 @@
         </v-col>
         <v-col cols="12" md="4">
           <v-toolbar dense>
-            <v-toolbar-title class="flex text-center">Cart</v-toolbar-title>
+            <v-toolbar-title class="flex text-center"
+              >Cart Item{{ countCart === 1 ? '' : 's' }}</v-toolbar-title
+            >
           </v-toolbar>
           <v-card
             v-for="(cart, index) in carts"
@@ -75,7 +119,7 @@
               <v-list-item class="pa-0">
                 <v-list-item-avatar size="100" tile>
                   <v-img
-                    :src="`http://biker.test/storage/${cart.img.slice(7)}`"
+                    :src="`https://biker.test/storage/${cart.img.slice(7)}`"
                   ></v-img>
                 </v-list-item-avatar>
                 <v-list-item-content>
@@ -83,7 +127,7 @@
                   <v-text-field
                     type="number"
                     readonly
-                    :value="cart.qty"
+                    :value="cart.quantity"
                     outlined
                     class="centered-text"
                     dense
@@ -93,18 +137,18 @@
                     <v-icon
                       slot="prepend-inner"
                       color="red"
-                      @click="SET_DECREAS_QTY(cart)"
+                      @click="decreaseQty(cart)"
                       >mdi-minus</v-icon
                     >
                     <v-icon
                       slot="append"
                       color="green"
-                      @click="SET_INCREAS_QTY(cart)"
+                      @click="increaseQty(cart)"
                       >mdi-plus</v-icon
                     >
                   </v-text-field>
                   <v-list-item-title class="py-2"
-                    >Rp. {{ cart.price * cart.qty }}</v-list-item-title
+                    >Rp. {{ cart.price * cart.quantity }}</v-list-item-title
                   >
                 </v-list-item-content>
               </v-list-item>
@@ -120,6 +164,20 @@
           <v-btn to="/events" class="justify-center">back to event</v-btn>
         </v-card-text>
       </v-row>
+      <v-snackbar :value="snackbar" timeout="4000" :color="color">
+        <v-btn v-if="success" text small
+          ><v-icon>mdi-information-outline</v-icon></v-btn
+        >
+        <span v-if="success">
+          {{ success }}
+        </span>
+        <div v-else>
+          <!-- <ul v-for="(item, i) in error" :key="i">
+            <li>{{ item[0] }}</li>
+          </ul> -->
+          {{ error }}
+        </div>
+      </v-snackbar>
     </v-layout>
   </v-container>
 </template>
@@ -130,12 +188,25 @@
 import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
 export default {
   middleware: 'auth',
+  data: () => ({
+    valid: false,
+    show: null,
+  }),
   computed: {
     ...mapGetters({
-      carts: 'carts/carts',
-      amount: 'carts/amount',
+      carts: 'orders/carts',
+      amount: 'orders/amount',
     }),
-    ...mapState('carts', ['paymentList', 'payment']),
+    ...mapState('orders', [
+      'paymentList',
+      'payment',
+      'countCart',
+      'loading',
+      'snackbar',
+      'error',
+      'success',
+      'color',
+    ]),
     ...mapState('users', ['name', 'email', 'phone_number', 'isProfile']),
     listsVA() {
       return this.paymentList.filter((item) => item.group === 'Virtual Account')
@@ -145,18 +216,43 @@ export default {
     carts() {
       if (this.carts.length === 0) {
         localStorage.removeItem('carts')
+        localStorage.removeItem('amount')
       }
+    },
+    amount() {
+      if (this.amount === 0) {
+        localStorage.removeItem('amount')
+      }
+    },
+    snackbar(val) {
+      val &&
+        setTimeout(
+          () => this.$store.commit('orders/SET_SNACKBAR', this.snackbar),
+          4500
+        )
     },
   },
   mounted() {
-    this.dataBank()
     this.fetchCart(this.carts)
+    this.dataBank()
+    this.countCarts()
   },
   beforeDestroy() {
     this.$store.commit('users/SET_RESET')
   },
   methods: {
-    ...mapMutations('carts', [
+    createOrder() {
+      if (this.$refs.form.validate()) {
+        this.submitOrder()
+          .then(() => {
+            this.$refs.form.resetValidation()
+          })
+          .catch((error) => {
+            console.log(error)
+          })
+      }
+    },
+    ...mapMutations('orders', [
       'SET_SAVE_CARTS',
       'SET_QTY',
       'SET_INCREAS_QTY',
@@ -165,10 +261,14 @@ export default {
     ]),
     ...mapMutations('users', ['SET_NAME', 'SET_EMAIL', 'SET_PHONE_NUMBER']),
     ...mapActions({
-      fetchCart: 'carts/fetchCart',
-      cartAmount: 'carts/cartAmount',
-      dataBank: 'carts/dataBank',
+      fetchCart: 'orders/fetchCart',
+      cartAmount: 'orders/cartAmount',
+      countCarts: 'orders/countCarts',
+      dataBank: 'orders/dataBank',
       fillFormCart: 'users/fillFormCart',
+      submitOrder: 'orders/submitOrder',
+      increaseQty: 'orders/increaseQty',
+      decreaseQty: 'orders/decreaseQty',
     }),
   },
 }

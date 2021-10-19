@@ -7,7 +7,7 @@
             <v-img
               class="align-end"
               height="200px"
-              :src="`http://biker.test/storage/${event.image_url.slice(7)}`"
+              :src="`https://biker.test/storage/${event.image_url.slice(7)}`"
             >
               <v-card-actions class="pa-0">
                 <v-list-item>
@@ -263,8 +263,8 @@ export default {
     },
     ...mapGetters({
       events: 'events/events',
-      carts: 'carts/carts',
-      countCart: 'carts/countCart',
+      carts: 'orders/carts',
+      countCart: 'orders/countCart',
     }),
     ...mapState('events', [
       'title',
@@ -310,9 +310,9 @@ export default {
       updateEvent: 'events/updateEvent',
       updateImage: 'events/updateImage',
       deleteEvent: 'events/deleteEvent',
-      addToCart: 'carts/addToCart',
-      fetchCart: 'carts/fetchCart',
-      countCarts: 'carts/countCarts',
+      addToCart: 'orders/addToCart',
+      fetchCart: 'orders/fetchCart',
+      countCarts: 'orders/countCarts',
     }),
     ...mapMutations('events', [
       'SET_TITLE',

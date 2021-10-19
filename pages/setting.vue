@@ -16,7 +16,7 @@
                   <v-img
                     :src="
                       $auth.user.profile_image
-                        ? `http://biker.test/storage/${$auth.user.profile_image.slice(
+                        ? `https://biker.test/storage/${$auth.user.profile_image.slice(
                             7
                           )}`
                         : ''
@@ -137,6 +137,7 @@
                           <v-text-field
                             label="Date of birth"
                             :value="date_of_birth"
+                            :rules="[(v) => !!v || 'Date Of Birth is required']"
                             prepend-icon="mdi-calendar"
                             readonly
                             v-bind="attrs"
@@ -169,7 +170,7 @@
                         :loading="loading"
                         color="indigo"
                         block
-                        @click="updateProfile"
+                        @click="updateProfileUser"
                         >update</v-btn
                       >
                     </v-card-actions>
@@ -182,8 +183,13 @@
         <v-card rounded="0" color="transparent">
           <v-list>
             <v-list-item-group>
-              <v-list-item>
-                <v-list-item-subtitle>My Order</v-list-item-subtitle>
+              <v-list-item to="/order">
+                <v-list-item-subtitle>My Order </v-list-item-subtitle>
+                <v-list-item-icon
+                  ><v-chip v-if="orders.length" small color="success">{{
+                    orders.length
+                  }}</v-chip></v-list-item-icon
+                >
               </v-list-item>
               <v-divider></v-divider>
               <v-list-item>
@@ -310,7 +316,7 @@
   </v-layout>
 </template>
 <script>
-import { mapState, mapActions, mapMutations } from 'vuex'
+import { mapState, mapActions, mapMutations, mapGetters } from 'vuex'
 export default {
   middleware: 'auth',
   data: () => ({
@@ -327,6 +333,9 @@ export default {
     show2: false,
   }),
   computed: {
+    ...mapGetters({
+      orders: 'orders/orders',
+    }),
     ...mapState('users', [
       'name',
       'email',
@@ -412,6 +421,11 @@ export default {
     updateProfileImg() {
       if (this.$refs.form.validate()) {
         this.updateProfileImage()
+      }
+    },
+    updateProfileUser() {
+      if (this.$refs.form.validate()) {
+        this.updateProfile()
       }
     },
     submitPassword() {

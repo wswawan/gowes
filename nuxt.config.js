@@ -3,7 +3,7 @@
 import colors from 'vuetify/es5/util/colors'
 
 export default {
-  // target: 'static',
+  target: 'static',
   // ssr: false,
   // server: {
   //   host: '0.0.0.0',
@@ -53,7 +53,7 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: 'http://biker.test',
+    baseURL: 'https://back.afalclo.id',
     headers: {
       common: {
         Accept: 'application/json, text/plain, */*',
@@ -76,7 +76,7 @@ export default {
     strategies: {
       laravelSanctum: {
         provider: 'laravel/sanctum',
-        url: 'http://biker.test',
+        url: 'https://back.afalclo.id',
         endpoints: {
           login: {
             url: '/api/login',

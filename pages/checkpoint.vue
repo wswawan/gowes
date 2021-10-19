@@ -56,7 +56,6 @@
                     ></v-text-field>
                     <v-autocomplete
                       v-model="select"
-                      :value="user"
                       :rules="rules.pic"
                       required
                       label="Select PIC"
@@ -64,7 +63,7 @@
                       item-text="name"
                       item-value="id"
                       return-object
-                      @change="SET_USER"
+                      @change="SET_PIC"
                     >
                     </v-autocomplete>
                     <v-divider></v-divider>
@@ -108,7 +107,7 @@
             class="mx-center"
             color="blue"
             text
-            :href="`http://biker.test/storage/qrcode/${item.qrcode_url}`"
+            :href="`http://biker.test/storage/${item.qrcode_url.slice(7)}`"
             :download="item.name"
             >download
           </v-btn>
@@ -191,7 +190,7 @@ export default {
       },
       {
         text: 'PIC',
-        value: 'user.name',
+        value: 'pic.name',
       },
       {
         text: 'QRCode',
@@ -211,7 +210,7 @@ export default {
       'name',
       'description',
       'qrcode_url',
-      'user',
+      'pic',
       'dialog',
       'loading',
       'snackbar',
@@ -253,7 +252,7 @@ export default {
     ...mapMutations('checkpoints', [
       'SET_NAME',
       'SET_DESCRIPTION',
-      'SET_USER',
+      'SET_PIC',
       'SET_QRCODE_URL',
       'SET_COLOR',
       'SET_DIALOG',
@@ -294,8 +293,8 @@ export default {
       this.$store.commit('checkpoints/SET_ID', item.id)
       this.$store.commit('checkpoints/SET_NAME', item.name)
       this.$store.commit('checkpoints/SET_DESCRIPTION', item.description)
-      this.$store.commit('checkpoints/SET_USER', item.user)
-      this.select = item.user
+      this.$store.commit('checkpoints/SET_PIC', item.pic)
+      this.select = this.$store.state.checkpoints.pic
     },
     deleteItem(item) {
       this.$store.commit('checkpoints/SET_DIALOG_DELETE', this.dialogDelete)

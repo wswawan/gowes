@@ -84,13 +84,18 @@
       <v-btn to="/setting">
         <span>Setting</span>
         <v-icon>mdi-dots-horizontal</v-icon>
+        <v-badge
+          v-if="orders.length"
+          :content="orders.length"
+          color="success"
+        ></v-badge>
       </v-btn>
     </v-bottom-navigation>
   </v-app>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 export default {
   name: 'Default',
   data() {
@@ -121,9 +126,18 @@ export default {
       title: 'Etape Pasundan',
     }
   },
+  computed: {
+    ...mapGetters({
+      orders: 'orders/orders',
+    }),
+  },
+  created() {
+    this.myOrder()
+  },
   methods: {
     ...mapActions({
       logout: 'users/logout',
+      myOrder: 'orders/myOrder',
     }),
   },
 }
