@@ -107,7 +107,7 @@
             class="mx-center"
             color="blue"
             text
-            :href="`http://biker.test/storage/${item.qrcode_url.slice(7)}`"
+            :href="`${url}${item.qrcode_url.slice(7)}`"
             :download="item.name"
             >download
           </v-btn>
@@ -221,6 +221,7 @@ export default {
       'dialogDelete',
     ]),
     ...mapGetters({
+      url: 'events/url',
       checkpoints: 'checkpoints/checkpoints',
       users: 'users/users',
     }),

@@ -17,11 +17,15 @@ export const state = () => ({
   color: '',
   error: [],
   success: '',
+  url: 'https://back.afalclo.id/storage/',
 })
 
 export const getters = {
   events(state) {
     return state.events
+  },
+  url(state) {
+    return state.url
   },
 }
 export const actions = {

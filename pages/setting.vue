@@ -16,9 +16,7 @@
                   <v-img
                     :src="
                       $auth.user.profile_image
-                        ? `https://biker.test/storage/${$auth.user.profile_image.slice(
-                            7
-                          )}`
+                        ? `${url}${$auth.user.profile_image.slice(7)}`
                         : ''
                     "
                     alt="user"
@@ -334,6 +332,7 @@ export default {
   }),
   computed: {
     ...mapGetters({
+      url: 'events/url',
       orders: 'orders/orders',
     }),
     ...mapState('users', [

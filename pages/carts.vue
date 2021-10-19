@@ -118,9 +118,7 @@
             <v-card-text class="py-0">
               <v-list-item class="pa-0">
                 <v-list-item-avatar size="100" tile>
-                  <v-img
-                    :src="`https://biker.test/storage/${cart.img.slice(7)}`"
-                  ></v-img>
+                  <v-img :src="`${url}${cart.img.slice(7)}`"></v-img>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <div class="text-overline">{{ cart.title }}</div>
@@ -194,6 +192,7 @@ export default {
   }),
   computed: {
     ...mapGetters({
+      url: 'events/url',
       carts: 'orders/carts',
       amount: 'orders/amount',
     }),
@@ -234,7 +233,6 @@ export default {
   },
   mounted() {
     this.fetchCart(this.carts)
-    this.dataBank()
     this.countCarts()
   },
   beforeDestroy() {
@@ -264,7 +262,6 @@ export default {
       fetchCart: 'orders/fetchCart',
       cartAmount: 'orders/cartAmount',
       countCarts: 'orders/countCarts',
-      dataBank: 'orders/dataBank',
       fillFormCart: 'users/fillFormCart',
       submitOrder: 'orders/submitOrder',
       increaseQty: 'orders/increaseQty',

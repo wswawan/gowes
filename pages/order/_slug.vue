@@ -177,9 +177,7 @@
               <v-divider></v-divider>
               <v-list-item v-for="(item, index) in order.items" :key="index">
                 <v-list-item-avatar tile size="60">
-                  <v-img
-                    :src="`https://biker.test/storage/${item.img.slice(7)}`"
-                  ></v-img>
+                  <v-img :src="`${url}${item.img.slice(7)}`"></v-img>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title
@@ -207,6 +205,7 @@ export default {
     tab: null,
     copiedVA: false,
     copiedAmount: false,
+    paymentInstruction: [],
   }),
   async fetch({ store, $axios, params }) {
     await $axios.$get('/sanctum/csrf-cookie')
@@ -224,6 +223,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      url: 'events/url',
       order: 'orders/order',
       instructions: 'orders/instructions',
     }),

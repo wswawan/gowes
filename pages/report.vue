@@ -92,7 +92,7 @@ export default {
     ...mapState('qrscans', ['summary']),
     checkIn() {
       return this.$store.state.qrscans.summary.filter(
-        (item) => item.qrscans.length > 1
+        (item) => item.qrscans.length
       )
     },
   },

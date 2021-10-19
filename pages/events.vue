@@ -7,7 +7,7 @@
             <v-img
               class="align-end"
               height="200px"
-              :src="`https://biker.test/storage/${event.image_url.slice(7)}`"
+              :src="`${url}${event.image_url.slice(7)}`"
             >
               <v-card-actions class="pa-0">
                 <v-list-item>
@@ -262,6 +262,7 @@ export default {
       return this.carts.length
     },
     ...mapGetters({
+      url: 'events/url',
       events: 'events/events',
       carts: 'orders/carts',
       countCart: 'orders/countCart',

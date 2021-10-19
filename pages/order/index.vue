@@ -37,11 +37,7 @@
             <v-card-text class="pa-0">
               <v-list-item>
                 <v-list-item-avatar size="60" tile>
-                  <v-img
-                    :src="`https://biker.test/storage/${order.items[0].img.slice(
-                      7
-                    )}`"
-                  ></v-img>
+                  <v-img :src="`${url}${order.items[0].img.slice(7)}`"></v-img>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title class="text-capitalize">{{
@@ -99,6 +95,7 @@ export default {
   middleware: 'auth',
   computed: {
     ...mapGetters({
+      url: 'events/url',
       orders: 'orders/orders',
     }),
   },

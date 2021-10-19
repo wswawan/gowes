@@ -102,12 +102,13 @@ export const actions = {
         items: state.carts,
       })
       .then((data) => {
-        this.$router.push(`/order/${data.orderRef}`)
+        console.log(data)
         commit('SET_SAVE_ORDERS', data)
         commit('SET_COLOR', 'success')
         commit('SET_TEXT_SUCCESS', 'Successful Order')
         commit('SET_SNACKBAR', this.snackbar)
         commit('SET_LOADING', state.loading)
+        this.$router.push(`/order/${data.orderRef}`)
       })
       .catch(() => {
         commit('SET_COLOR', 'error')

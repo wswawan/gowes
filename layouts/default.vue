@@ -133,11 +133,13 @@ export default {
   },
   created() {
     this.myOrder()
+    this.dataBank()
   },
   methods: {
     ...mapActions({
       logout: 'users/logout',
       myOrder: 'orders/myOrder',
+      dataBank: 'orders/dataBank',
     }),
   },
 }
