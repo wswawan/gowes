@@ -1,12 +1,8 @@
 <template>
   <v-layout fill-height>
     <v-row justify="center" align="center">
-      <v-col cols="12" md="4" sm="4">
-        <v-btn icon x-large to="home"><v-icon>mdi-home-outline</v-icon></v-btn>
-        <v-card-text class="pa-0">
-          <v-card-title class="display-1">Welcome!</v-card-title>
-          <v-card-subtitle>Sign in to continue</v-card-subtitle>
-        </v-card-text>
+      <v-col cols="12" sm="8">
+        <GuestHeader welcome="Welcome!" title="Sign in to continue" />
         <v-card-text>
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-text-field

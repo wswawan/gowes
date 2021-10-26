@@ -1,7 +1,7 @@
 <template>
   <v-layout fill-height align-center>
     <v-row justify="center" align="center">
-      <v-col cols="12" sm="4">
+      <v-col cols="12" sm="8">
         <v-card-text class="text-center">
           <v-card-title class="display-1 justify-center">Hello !</v-card-title>
           <v-card-subtitle

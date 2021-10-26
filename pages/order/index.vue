@@ -74,10 +74,16 @@
                 <v-list-item-subtitle
                   class="text-capitalize font-weight-bold"
                   :class="
-                    order.status === 'UNPAID' ? 'red--text' : 'green--text'
+                    order.status === 'UNPAID' || order.status === 'CANCELED'
+                      ? 'red--text'
+                      : 'green--text'
                   "
                   >{{
-                    order.status === 'UNPAID' ? 'menunggu pembayaran' : 'lunas'
+                    order.status === 'UNPAID'
+                      ? 'menunggu pembayaran'
+                      : order.status === 'CANCELED'
+                      ? 'Dibatalkan'
+                      : 'lunas'
                   }}</v-list-item-subtitle
                 >
               </v-list-item>

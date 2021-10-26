@@ -110,12 +110,9 @@ export const actions = {
         commit('SET_LOADING', state.loading)
         this.$router.push(`/order/${data.orderRef}`)
       })
-      .catch(() => {
+      .catch((err) => {
         commit('SET_COLOR', 'error')
-        commit(
-          'SET_TEXT_ERROR',
-          'Please check your connection and refresh this page'
-        )
+        commit('SET_TEXT_ERROR', err.response.data.message)
         commit('SET_SNACKBAR', this.snackbar)
         commit('SET_LOADING', state.loading)
       })

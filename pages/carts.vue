@@ -44,40 +44,52 @@
                   ]"
                   @change="SET_PHONE_NUMBER"
                 ></v-text-field>
-                <v-radio-group
-                  :rules="[(v) => !!v || 'Please Select Payment']"
-                  required
-                >
-                  <v-radio
-                    label="Virtual Account"
-                    value="true"
-                    @click="show = true"
-                  ></v-radio>
-                  <v-select
-                    v-if="show"
-                    prepend-inner-icon="mdi-bank-outline"
-                    label="Select Payment"
+                <v-form ref="paymentChoose" v-model="valid" lazy-validation>
+                  <v-radio-group
                     :rules="[(v) => !!v || 'Please Select Payment']"
-                    :items="listsVA"
-                    item-text="name"
-                    item-value="code"
-                    @change="SET_PAYMENT"
+                    required
                   >
-                  </v-select>
+                    <v-radio
+                      label="Virtual Account"
+                      value="Virtual Account"
+                      @change="changeToVA"
+                    ></v-radio>
+                    <v-select
+                      v-if="showVA"
+                      prepend-inner-icon="mdi-bank-outline"
+                      label="Select Payment"
+                      :rules="[(v) => !!v || 'Please Select Payment']"
+                      :items="listsVA"
+                      item-text="name"
+                      item-value="code"
+                      @change="SET_PAYMENT"
+                    >
+                    </v-select>
 
-                  <v-radio
-                    label="Alfamart"
-                    value="ALFAMART"
-                    @click="show = false"
-                    @change="SET_PAYMENT('ALFAMART')"
-                  ></v-radio>
-                  <v-radio
-                    label="E-Wallet / QRIS"
-                    value="QRIS"
-                    @click="show = false"
-                    @change="SET_PAYMENT('QRISC')"
-                  ></v-radio>
-                </v-radio-group>
+                    <v-radio
+                      label="Minimarket"
+                      value="Minimarket"
+                      @change="changeToMinimarket"
+                    ></v-radio>
+                    <v-select
+                      v-if="showMiniMarket"
+                      prepend-inner-icon="mdi-storefront-outline"
+                      label="Select Store"
+                      :rules="[(v) => !!v || 'Please Select Store to Payment']"
+                      :items="listsMiniMarket"
+                      item-text="name"
+                      item-value="code"
+                      @change="SET_PAYMENT"
+                    >
+                    </v-select>
+                    <v-radio
+                      label="E-Wallet / QRIS"
+                      value="QRIS"
+                      @click=";(showVA = false), (showMiniMarket = false)"
+                      @change="SET_PAYMENT('QRISC')"
+                    ></v-radio>
+                  </v-radio-group>
+                </v-form>
 
                 <v-list-item class="px-0 text-center" two-line>
                   <v-list-item-content>
@@ -188,7 +200,9 @@ export default {
   middleware: 'auth',
   data: () => ({
     valid: false,
-    show: null,
+    show: false,
+    showVA: false,
+    showMiniMarket: false,
   }),
   computed: {
     ...mapGetters({
@@ -209,6 +223,11 @@ export default {
     ...mapState('users', ['name', 'email', 'phone_number', 'isProfile']),
     listsVA() {
       return this.paymentList.filter((item) => item.group === 'Virtual Account')
+    },
+    listsMiniMarket() {
+      return this.paymentList.filter(
+        (item) => item.group === 'Convenience Store'
+      )
     },
   },
   watch: {
@@ -240,7 +259,7 @@ export default {
   },
   methods: {
     createOrder() {
-      if (this.$refs.form.validate()) {
+      if (this.$refs.paymentChoose.validate() && this.$refs.form.validate()) {
         this.submitOrder()
           .then(() => {
             this.$refs.form.resetValidation()
@@ -267,6 +286,18 @@ export default {
       increaseQty: 'orders/increaseQty',
       decreaseQty: 'orders/decreaseQty',
     }),
+    changeToVA() {
+      this.$refs.paymentChoose.reset()
+      this.showVA = true
+      this.showMiniMarket = false
+      this.$store.commit('orders/SET_PAYMENT', null)
+    },
+    changeToMinimarket() {
+      this.$refs.paymentChoose.reset()
+      this.showVA = false
+      this.showMiniMarket = true
+      this.$store.commit('orders/SET_PAYMENT', null)
+    },
   },
 }
 </script>

@@ -1,11 +1,7 @@
 <template>
   <v-row justify="center">
-    <v-col cols="12" md="6">
-      <v-btn icon x-large to="home"><v-icon>mdi-home-outline</v-icon></v-btn>
-      <v-card-text class="pa-0">
-        <v-card-title class="display-1">Hi!</v-card-title>
-        <v-card-subtitle>Reset Password!</v-card-subtitle>
-      </v-card-text>
+    <v-col cols="12" sm="8">
+      <GuestHeader title="Reset Password!" />
       <v-form ref="form" v-model="valid" lazy-validation>
         <v-card-text>
           <v-text-field

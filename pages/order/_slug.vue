@@ -25,12 +25,16 @@
                   <v-list-item-title
                     class="text-capitalize font-weight-bold"
                     :class="
-                      order.status === 'UNPAID' ? 'red--text' : 'green--text'
+                      order.status === 'UNPAID' || order.status === 'CANCELED'
+                        ? 'red--text'
+                        : 'green--text'
                     "
                     >status:
                     {{
                       order.status === 'UNPAID'
                         ? 'Menunggu Pembayaran'
+                        : order.status === 'CANCELED'
+                        ? 'Dibatalkan'
                         : 'Lunas'
                     }}</v-list-item-title
                   >

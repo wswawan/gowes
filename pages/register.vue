@@ -1,12 +1,8 @@
 <template>
   <v-layout fill-height>
     <v-row justify="center" align="center">
-      <v-col cols="12" md="4" sm="4">
-        <v-btn icon x-large to="home"><v-icon>mdi-home-outline</v-icon></v-btn>
-        <v-card-text class="pa-0">
-          <v-card-title class="display-1">Hi!</v-card-title>
-          <v-card-subtitle>Create a new account</v-card-subtitle>
-        </v-card-text>
+      <v-col cols="12" sm="8">
+        <GuestHeader title="Create a new account!" />
         <v-card-text>
           <v-alert :value="alert" :color="color" dense border="top">
             <div v-for="(items, index) in error" :key="index">
